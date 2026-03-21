@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Home, MapPin, Users, Zap, MessageCircle, Bell, Settings, Crown, Star, Heart,
   Clock, DollarSign, ChevronRight, Search, ArrowRight, Eye, Send, Menu, X,
@@ -224,36 +224,184 @@ export default function TumaworksApp() {
   );
 
   // BROWSE SERVICES SCREEN (Takes you to search ahead or scroll all services / pieceworks)
-  const BrowseServicesScreen = () => (
-    <div className="min-h-screen bg-neutral-50 pb-28 pt-8 px-6">
-      <button onClick={() => navigate('dashboard')} className="text-primary font-bold mb-6 flex items-center gap-2 hover:opacity-70 transition">
-        <ArrowLeft className="w-5 h-5" /> Home
-      </button>
-      <h1 className="text-3xl font-extrabold text-foreground mb-4">All Services</h1>
-      <div className="relative shadow-sm mb-6">
-        <Search className="absolute left-4 top-4 w-5 h-5 text-neutral-400" />
-        <input type="text" placeholder="Search pieceworks by name..." className="w-full bg-white rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary font-medium" />
-      </div>
-      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
-        {['All', 'Home Services', 'Rides', 'Food', 'Logistics', 'Professional'].map((t, i) => (
-          <button key={i} className={`px-4 py-2 rounded-full font-bold whitespace-nowrap ${i === 0 ? 'bg-primary text-white' : 'bg-white text-neutral-600 border border-neutral-200'}`}>
-            {t}
+  const BrowseServicesScreen = () => {
+    const [activeTab, setActiveTab] = useState('All Services');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [services, setServices] = useState<any[]>([]);
+    const [popularServices, setPopularServices] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
+    const categories = ['All Services', 'Home Services', 'Food & Delivery', 'Repairs & Maintenance', 'Personal Services', 'Events & Creative', 'Transport & Moving', 'Business & Digital', 'Education & Training', 'Seasonal & Occasional'];
+    const quickChips = ['Laundry', 'Cleaning', 'Delivery', 'Repairs'];
+
+    useEffect(() => {
+      // Mock fetch popular services
+      import('./services/serviceService').then(({ serviceAPI }) => {
+        serviceAPI.getPopularServices(4).then(data => setPopularServices(data));
+      });
+    }, []);
+
+    const fetchServices = async (reset = false) => {
+      setLoading(true);
+      const targetPage = reset ? 1 : page + 1;
+      const { serviceAPI } = await import('./services/serviceService');
+      
+      const newItems = searchQuery.length > 0
+        ? await serviceAPI.searchServices(searchQuery, activeTab as any, { page: targetPage, limit: 50 })
+        : await serviceAPI.getServicesByCategory(activeTab as any, { page: targetPage, limit: 50 });
+      
+      if (newItems.length < 50) setHasMore(false);
+      else setHasMore(true);
+
+      if (reset) {
+        setServices(newItems);
+        setPage(1);
+      } else {
+        setServices(prev => [...prev, ...newItems]);
+        setPage(targetPage);
+      }
+      setLoading(false);
+    };
+
+    useEffect(() => {
+      // Small debounce simulation for rapid typing in search
+      const timer = setTimeout(() => {
+        fetchServices(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }, [activeTab, searchQuery]);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+      const bottom = e.currentTarget.scrollHeight - e.currentTarget.scrollTop <= e.currentTarget.clientHeight + 200;
+      if (bottom && !loading && hasMore) {
+        fetchServices();
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-neutral-50 flex flex-col pt-8" style={{ height: '100vh' }}>
+        <div className="px-6 flex-shrink-0">
+          <button onClick={() => navigate('dashboard')} className="text-primary font-bold mb-6 flex items-center gap-2 hover:opacity-70 transition">
+            <ArrowLeft className="w-5 h-5" /> Home
           </button>
-        ))}
-      </div>
-      <div className="grid gap-4 mt-2">
-        {['Plumbing & Pipe Repair', 'House Deep Cleaning', 'Welding & Metalwork', 'Ride Hailing (Economy)', 'Food Delivery', 'Babysitting', 'Electronic Gadget Repair', 'Driver for Hire'].map((srv, i) => (
-          <div key={i} className={`bg-white p-5 rounded-2xl shadow-sm border border-neutral-100 flex justify-between items-center ${cardHover}`}>
-            <div>
-              <h3 className="font-bold text-lg">{srv}</h3>
-              <p className="text-sm text-neutral-500">120+ workers nearby</p>
-            </div>
-            <button className="bg-accent/10 text-accent font-bold px-4 py-2 rounded-xl">View</button>
+          
+          <div className="flex justify-between items-end mb-4">
+             <div>
+                <h1 className="text-3xl font-extrabold text-foreground">All Services</h1>
+                <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-1">10,000+ Pieceworks Available</p>
+             </div>
           </div>
-        ))}
+          
+          <div className="relative shadow-sm mb-4">
+            <Search className="absolute left-4 top-4 w-5 h-5 text-neutral-400" />
+            <input 
+              type="text" 
+              placeholder="Search services, skills, or workers..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary font-medium border border-neutral-100 shadow-sm" 
+            />
+          </div>
+
+          {/* Quick Access Chips */}
+          <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+            {quickChips.map((chip, i) => (
+              <button 
+                key={i} 
+                onClick={() => setSearchQuery(chip)}
+                className="bg-primary/10 hover:bg-primary/20 transition text-primary px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap active:scale-95"
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
+            {categories.map((t, i) => (
+              <button 
+                key={i} 
+                onClick={() => { setActiveTab(t); setSearchQuery(''); }}
+                className={`py-2 px-5 rounded-full font-bold whitespace-nowrap transition-all duration-300 ${activeTab === t ? 'bg-primary text-white shadow-md' : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/50'}`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 pb-28 pt-2" onScroll={handleScroll}>
+          
+          {/* Recommended / Popular Section */}
+          {(activeTab === 'All Services' && searchQuery === '') && (
+            <div className="mb-6">
+              <h2 className="text-xl font-extrabold text-foreground mb-3">Popular & Recommended</h2>
+              <div className="grid gap-4">
+                {popularServices.map((srv, i) => (
+                  <div key={i} className={`bg-gradient-to-r from-orange-50 to-amber-50 p-4 rounded-3xl border border-orange-100 flex gap-4 items-center ${cardHover}`}>
+                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm transform -rotate-6">{srv.icon}</div>
+                    <div className="flex-1">
+                      <h3 className="font-extrabold text-foreground text-lg">{srv.name}</h3>
+                      <div className="flex gap-2 text-xs font-bold text-neutral-500 mt-0.5">
+                        <span className="flex items-center text-accent"><Star className="w-3 h-3 fill-accent mr-1"/> {srv.rating} ({srv.reviews})</span>
+                        <span>•</span>
+                        <span className="text-primary font-extrabold">{srv.price}</span>
+                      </div>
+                    </div>
+                    <button onClick={() => navigate('worker-profile')} className="bg-primary text-white font-bold p-3 rounded-2xl shadow hover:scale-105 active:scale-95 transition-transform"><ArrowRight className="w-5 h-5"/></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Service List with programmatic simulated lazy loading */}
+          <div className="grid grid-cols-1 gap-4">
+            {services.map((srv, i) => (
+              <div key={srv.id} onClick={() => navigate('worker-profile')} className={`bg-white p-5 rounded-3xl shadow-sm border border-neutral-100 flex gap-4 items-start ${cardHover}`}>
+                <div className="w-16 h-16 bg-neutral-50 border border-neutral-100 rounded-2xl flex items-center justify-center text-4xl shadow-inner flex-shrink-0">
+                  {srv.icon}
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-extrabold text-foreground text-[17px] leading-tight mb-1">{srv.name}</h3>
+                  </div>
+                  <p className="text-[10px] uppercase font-bold text-primary bg-primary/10 tracking-wider inline-block px-2 py-0.5 rounded-lg mb-2">{srv.category} - {srv.subcategory}</p>
+                  <p className="text-sm text-neutral-500 font-medium line-clamp-2 leading-snug">{srv.shortDescription}</p>
+                  <div className="flex items-center justify-between mt-4">
+                    <span className="font-black text-foreground text-lg">{srv.price}</span>
+                    <button className="bg-neutral-100 text-foreground font-bold px-4 py-2 rounded-xl text-xs hover:bg-neutral-200 transition">View Pro</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {loading && (
+            <div className="py-8 flex justify-center">
+              <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+            </div>
+          )}
+
+          {!hasMore && services.length > 0 && (
+            <div className="my-8 text-center flex flex-col items-center justify-center opacity-30">
+               <div className="w-12 h-1 bg-neutral-400 rounded-full mb-3" />
+               <p className="text-neutral-600 font-bold text-sm uppercase tracking-widest">End of results</p>
+            </div>
+          )}
+
+          {!loading && services.length === 0 && (
+             <div className="flex flex-col items-center justify-center py-16 text-center opacity-60">
+                <Search className="w-16 h-16 mb-4 text-neutral-400" />
+                <p className="font-bold text-lg">No services found.</p>
+                <p className="text-neutral-500 text-sm mt-1 max-w-xs pr-4 pl-4">Try adjusting your filters or typing different keywords.</p>
+             </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // TASK CREATION / BOOKING SCREEN
   const TaskCreationScreen = () => (
