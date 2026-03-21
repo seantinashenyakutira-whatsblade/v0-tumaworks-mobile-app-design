@@ -6,8 +6,14 @@ import {
   Clock, DollarSign, ChevronRight, Search, ArrowRight, Eye, Send, Menu, X,
   ShoppingBag, Wrench, Car, Briefcase, Camera, Grid, List, Tag, Share2, Phone,
   Droplets, Hammer, PenTool, Flame, ArrowLeft, Navigation, Edit3, Image as ImageIcon,
-  CheckCircle, PlusCircle, Filter, Baby, ShoppingCart, WashingMachine
+  CheckCircle, PlusCircle, Filter, Baby, ShoppingCart, WashingMachine, TrendingUp, HandCoins, ShieldCheck, Wallet as WalletIcon
 } from 'lucide-react';
+
+import { AuthService } from './services/authService';
+import { DBService } from './services/databaseService';
+import { MatchingService } from './services/matchingService';
+import { PaymentService } from './services/paymentService';
+import { UserProfile, UserRole } from './types';
 
 type Screen =
   | 'onboarding'
@@ -28,10 +34,45 @@ type Screen =
 
 export default function TumaworksApp() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding');
-  const [userRole, setUserRole] = useState<'client' | 'worker'>('client');
-  const [diamonds, setDiamonds] = useState(450);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [diamonds, setDiamonds] = useState(120);
+  const [role, setRole] = useState<UserRole>('client');
   const [isPremium, setIsPremium] = useState(false);
   const [budget, setBudget] = useState(1500);
+
+  // Load persistence logic
+  useEffect(() => {
+    const unsub = AuthService.onAuthStateChange(async (firebaseUser) => {
+       if (firebaseUser) {
+          const profile = await DBService.getUserProfile(firebaseUser.uid);
+          setUser(profile);
+          if (profile) setRole(profile.role);
+          setCurrentScreen('dashboard');
+       } else {
+          setUser(null);
+          setCurrentScreen('onboarding');
+       }
+       setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  const toggleRole = async () => {
+    if (!user) return;
+    const newRole = role === 'client' ? 'worker' : 'client';
+    setLoading(true);
+    try {
+      await DBService.createUserProfile(user.id, { role: newRole as UserRole });
+      setRole(newRole as UserRole);
+      const updatedProfile = await DBService.getUserProfile(user.id);
+      setUser(updatedProfile);
+    } catch (err) {
+      alert('Failed to switch role');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const navigate = (screen: Screen) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -72,52 +113,99 @@ export default function TumaworksApp() {
   );
 
   // SIGNIN SCREEN
-  const SignInScreen = () => (
-    <div className="min-h-screen bg-white pt-12 px-6 pb-6 flex flex-col justify-center">
-      <div className="max-w-md mx-auto w-full">
-        <button onClick={() => navigate('onboarding')} className="text-primary font-bold mb-8 flex items-center gap-2 hover:opacity-70 transition">
-          <ArrowLeft className="w-5 h-5" /> Back
-        </button>
-        <h1 className="text-4xl font-extrabold text-foreground mb-2 tracking-tight">Welcome back</h1>
-        <p className="text-neutral-500 mb-8 font-medium">Sign in to Tumaworks</p>
-        <div className="space-y-4 mb-8">
-          <input type="email" placeholder="Email address" className="w-full bg-neutral-100 rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition shadow-sm hover:shadow-md" />
-          <input type="password" placeholder="Password" className="w-full bg-neutral-100 rounded-2xl px-5 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition shadow-sm hover:shadow-md" />
-        </div>
-        <button onClick={() => navigate('dashboard')} className={`w-full ${btnPrimary} mb-6`}>
-          Sign In
-        </button>
-        <p className="text-center text-neutral-600 font-medium">
-          Don't have an account?{' '}
-          <button onClick={() => navigate('signup')} className="text-primary font-bold hover:underline">
-            Sign up
-          </button>
-        </p>
-      </div>
-    </div>
-  );
+  const SignInScreen = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [authLoading, setAuthLoading] = useState(false);
 
-  // SIGNUP SCREEN
-  const SignUpScreen = () => (
-    <div className="min-h-screen bg-white pt-12 px-6 pb-6 flex flex-col justify-center">
-      <div className="max-w-md mx-auto w-full">
-        <button onClick={() => navigate('signin')} className="text-primary font-bold mb-8 flex items-center gap-2 hover:opacity-70 transition">
-          <ArrowLeft className="w-5 h-5" /> Back
-        </button>
-        <h1 className="text-4xl font-extrabold text-foreground mb-2 tracking-tight">Create account</h1>
-        <p className="text-neutral-500 mb-8 font-medium">Join Tumaworks in seconds</p>
-        <div className="space-y-4 mb-8">
-          <input type="text" placeholder="Full name" className="w-full bg-neutral-100 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary transition shadow-sm hover:shadow-md" />
-          <input type="email" placeholder="Email address" className="w-full bg-neutral-100 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary transition shadow-sm hover:shadow-md" />
-          <input type="tel" placeholder="Phone number" className="w-full bg-neutral-100 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary transition shadow-sm hover:shadow-md" />
-          <input type="password" placeholder="Create password" className="w-full bg-neutral-100 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-primary transition shadow-sm hover:shadow-md" />
+    const handleLogin = async () => {
+       if (!email || !password) return alert('Please fill in all fields');
+       setAuthLoading(true);
+       try {
+          await AuthService.login(email, password);
+          // navigate('dashboard') happens via useEffect
+       } catch (err: any) {
+          alert('Login failed: ' + err.message);
+       } finally {
+          setAuthLoading(false);
+       }
+    };
+
+    return (
+      <div className="min-h-screen bg-white pt-12 px-8 flex flex-col items-center justify-center">
+        <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mb-8 shadow-xl"><Zap className="w-10 h-10 text-primary fill-primary"/></div>
+        <h1 className="text-4xl font-black text-foreground mb-2 tracking-tight">Welcome Back</h1>
+        <p className="text-neutral-500 font-bold mb-10 text-center">Login to your Tumaworks account</p>
+        
+        <div className="w-full space-y-4 max-w-sm">
+          <div className="relative">
+            <Search className="absolute left-4 top-4.5 w-5 h-5 text-neutral-400" />
+            <input type="email" placeholder="Email Address" value={email} onChange={(e)=>setEmail(e.target.value)} className="w-full bg-neutral-50 rounded-2xl p-4 pl-12 border border-neutral-100 focus:ring-2 focus:ring-primary outline-none font-bold shadow-inner" />
+          </div>
+          <div className="relative">
+            <ShieldCheck className="absolute left-4 top-4.5 w-5 h-5 text-neutral-400" />
+            <input type="password" placeholder="Password" value={password} onChange={(e)=>setPassword(e.target.value)} className="w-full bg-neutral-50 rounded-2xl p-4 pl-12 border border-neutral-100 focus:ring-2 focus:ring-primary outline-none font-bold shadow-inner" />
+          </div>
+          
+          <button onClick={handleLogin} disabled={authLoading} className="w-full bg-primary text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex justify-center items-center gap-3">
+             {authLoading ? <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin"></div> : 'Sign In Now'}
+          </button>
         </div>
-        <button onClick={() => navigate('dashboard')} className={`w-full ${btnPrimary}`}>
-          Sign Up
-        </button>
+        
+        <div className="mt-8 text-neutral-400 font-bold flex gap-2">No account? <button onClick={() => navigate('signup')} className="text-primary hover:underline">Create One</button></div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const SignUpScreen = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    const [userRole, setUserRole] = useState<UserRole>('client');
+    const [authLoading, setAuthLoading] = useState(false);
+
+    const handleSignup = async () => {
+       if (!email || !password || !name) return alert('Please fill in all fields');
+       setAuthLoading(true);
+       try {
+          await AuthService.signup(email, password, name, userRole);
+       } catch (err: any) {
+          alert('Signup failed: ' + err.message);
+       } finally {
+          setAuthLoading(false);
+       }
+    };
+
+    return (
+      <div className="min-h-screen bg-white pt-12 px-8 flex flex-col items-center justify-center">
+        <h1 className="text-4xl font-black text-foreground mb-2 tracking-tight">Join Us</h1>
+        <p className="text-neutral-500 font-bold mb-8 text-center text-sm px-6 leading-relaxed">Create a production profile on Zambia's largest piecework marketplace.</p>
+        
+        <div className="w-full space-y-4 max-w-sm">
+          <input type="text" placeholder="Full Name" value={name} onChange={(e)=>setName(e.target.value)} className="w-full bg-neutral-50 rounded-2xl p-4 border border-neutral-100 font-bold shadow-inner" />
+          <input type="email" placeholder="Email Address" value={email} onChange={(e)=>setEmail(e.target.value)} className="w-full bg-neutral-50 rounded-2xl p-4 border border-neutral-100 font-bold shadow-inner" />
+          <input type="password" placeholder="Create Password" value={password} onChange={(e)=>setPassword(e.target.value)} className="w-full bg-neutral-50 rounded-2xl p-4 border border-neutral-100 font-bold shadow-inner" />
+          
+          <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-100">
+             <p className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-4 text-center">I want to be a</p>
+             <div className="flex gap-4">
+                {['client', 'worker'].map((r) => (
+                   <button key={r} onClick={() => setUserRole(r as UserRole)} className={`flex-1 py-3.5 rounded-xl font-black capitalize transition-all duration-300 ${userRole === r ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white text-neutral-400 hover:text-neutral-500'}`}>
+                      {r}
+                   </button>
+                ))}
+             </div>
+          </div>
+
+          <button onClick={handleSignup} disabled={authLoading} className="w-full bg-primary text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex justify-center items-center gap-3">
+             {authLoading ? <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin"></div> : 'Launch Profile'}
+          </button>
+        </div>
+        
+        <div className="mt-8 text-neutral-400 font-bold flex gap-2">Member? <button onClick={() => navigate('signin')} className="text-primary hover:underline">Sign In Instead</button></div>
+      </div>
+    );
+  };
 
   // DASHBOARD SCREEN
   const DashboardScreen = () => (
@@ -128,8 +216,8 @@ export default function TumaworksApp() {
         <div className="relative z-10">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <p className="text-white/80 text-sm font-medium">Good afternoon</p>
-              <h1 className="text-3xl font-extrabold tracking-tight">Sean</h1>
+              <p className="text-white/80 text-sm font-medium">Hello there,</p>
+              <h1 className="text-3xl font-extrabold tracking-tight">{user?.name || 'User'}</h1>
             </div>
             <button onClick={() => navigate('notifications')} className={`relative p-3 bg-white/10 rounded-full hover:bg-white/20 transition-all ${cardHover}`}>
               <Bell className="w-6 h-6" />
@@ -138,7 +226,7 @@ export default function TumaworksApp() {
           </div>
           <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-xl">
             <p className="text-sm text-white/80 font-medium">Available Balance</p>
-            <p className="text-4xl font-extrabold text-white my-2">ZMW 2,450.00</p>
+            <p className="text-4xl font-extrabold text-white my-2">ZMW {user?.walletBalance?.toLocaleString() || '0.00'}</p>
             <div className="flex gap-3 mt-4">
               <button className="flex-1 bg-white/20 hover:bg-white/30 text-white rounded-full py-2 text-sm font-bold transition transform active:scale-95">Withdraw</button>
               <button className="flex-1 bg-accent text-white rounded-full py-2 text-sm font-bold transition transform hover:shadow-lg active:scale-95 hover:bg-accent/90">Add Funds</button>
@@ -574,38 +662,6 @@ export default function TumaworksApp() {
     </div>
   );
 
-  // MARKETPLACE SCREEN (Replacing Rewards)
-  const MarketplaceScreen = () => (
-    <div className="min-h-screen bg-neutral-50 pb-28 pt-8 px-6">
-      <h1 className="text-3xl font-extrabold text-foreground mb-4">Marketplace</h1>
-      <div className="relative shadow-sm mb-6">
-        <Search className="absolute left-4 top-4 w-5 h-5 text-neutral-400" />
-        <input type="text" placeholder="Search goods, subscriptions, auctions..." className="w-full bg-white rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary font-medium" />
-      </div>
-      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
-        {['Cash & Carry', 'Subscriptions', 'Auctions'].map((tab, i) => (
-          <button key={i} className={`px-5 py-2.5 rounded-full font-bold whitespace-nowrap shadow-sm transition ${i === 0 ? 'bg-primary text-white' : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'}`}>
-            {tab}
-           </button>
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-         {[
-           { n: 'Plumbing Kit Pro', p: 'ZMW 1,200', tag: 'Sale', img: '🔧' },
-           { n: 'Monthly Cleaning Sub', p: 'ZMW 1,500/mo', tag: 'Subs', img: '🧽' },
-           { n: 'Toolbox Vintage', p: 'Current Bid: ZMW 400', tag: 'Auction', img: '🧰' },
-           { n: 'Cooking Pots Set', p: 'ZMW 850', tag: 'Sale', img: '🍲' },
-         ].map((item, i) => (
-           <div key={i} className={`bg-white rounded-2xl p-4 shadow-sm border border-neutral-100 flex flex-col items-center text-center ${cardHover}`}>
-              <div className="w-full h-24 bg-neutral-100 rounded-xl mb-3 flex items-center justify-center text-4xl">{item.img}</div>
-              <span className="bg-primary/10 text-primary text-[10px] font-extrabold uppercase px-2 py-1 rounded w-max mb-2">{item.tag}</span>
-              <h3 className="font-bold text-sm leading-tight mb-2">{item.n}</h3>
-              <p className="font-extrabold text-accent mt-auto">{item.p}</p>
-           </div>
-         ))}
-      </div>
-    </div>
-  );
 
   // CHAT LIST SCREEN (WhatsApp style)
   const ChatListScreen = () => (
@@ -721,7 +777,18 @@ export default function TumaworksApp() {
             </div>
          </div>
 
-         <button className="w-full py-4 text-red-500 font-bold bg-red-50 rounded-2xl border border-red-100 hover:bg-red-100 transition">Sign Out</button>
+          <div className="bg-primary/5 rounded-3xl p-6 border border-primary/10 mb-6">
+             <div className="flex items-center gap-3 mb-4">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                <h3 className="font-black text-foreground">Role Management</h3>
+             </div>
+             <p className="text-sm text-neutral-500 mb-4 font-medium">You are currently using Tumaworks as a <span className="text-primary font-bold uppercase">{role}</span>. Switch to {role === 'client' ? 'Worker' : 'Client'} mode to {role === 'client' ? 'provide' : 'request'} services.</p>
+             <button onClick={toggleRole} className="w-full py-4 bg-white border-2 border-primary text-primary font-black rounded-2xl hover:bg-primary hover:text-white transition-all duration-300 transform active:scale-95 shadow-md">
+                Switch to {role === 'client' ? 'Worker' : 'Client'} Mode
+             </button>
+          </div>
+
+          <button onClick={() => { AuthService.logout(); navigate('onboarding'); }} className="w-full py-4 text-red-500 font-bold bg-red-50 rounded-2xl border border-red-100 hover:bg-red-100 transition shadow-sm active:scale-95">Sign Out</button>
       </div>
     </div>
   );
@@ -729,6 +796,83 @@ export default function TumaworksApp() {
   // NOTIFICATION & OTHERS placeholders
   const NotificationsScreen = () => <div className="p-6"><button onClick={()=>navigate('dashboard')} className="text-primary font-bold">Back</button><h1 className="text-2xl font-bold mt-4">Notifications</h1><p className="mt-4">No new notifications.</p></div>;
   const SubscriptionScreen = () => <div className="p-6"><button onClick={()=>navigate('dashboard')} className="text-primary font-bold">Back</button><h1 className="text-2xl font-bold mt-4">Premium Plans</h1></div>;
+  
+  const MarketplaceScreen = () => {
+    const [listings, setListings] = useState<any[]>([]);
+    const [loadingListings, setLoadingListings] = useState(false);
+
+    useEffect(() => {
+       setLoadingListings(true);
+       // Real-world marketplace fetch logic goes here
+       setTimeout(() => {
+          const mockListings = [
+             { id: '1', title: 'Professional Laptop Repair', desc: 'Fast turnaround in Lusaka. Same day service.', price: 450, category: 'Tech', location: 'Lusaka Central', img: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&q=80&w=400', time: '2h ago' },
+             { id: '2', title: 'High Yield Maize Seeds', desc: 'Best for local soil conditions. Certified grade.', price: 1200, category: 'Farming', location: 'Chisamba', img: 'https://images.unsplash.com/photo-1551739440-5dd934d3a94a?auto=format&fit=crop&q=80&w=400', time: '5h ago' },
+             { id: '3', title: 'Catering for Events', desc: 'Traditional Zambian dishes and more.', price: 2500, category: 'Food', location: 'Lusaka South', img: 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&q=80&w=400', time: '1d ago' },
+          ];
+          setListings(mockListings);
+          setLoadingListings(false);
+       }, 800);
+    }, []);
+
+    return (
+       <div className="min-h-screen bg-neutral-50 pb-28">
+          <div className="bg-white p-6 sticky top-0 z-30 border-b border-neutral-100 shadow-sm flex items-center justify-between">
+             <h1 className="text-2xl font-black text-foreground">Marketplace</h1>
+             <button className="bg-primary/10 text-primary p-3 rounded-full hover:scale-105 active:scale-95 transition-all">
+                <PlusCircle className="w-6 h-6" />
+             </button>
+          </div>
+          <div className="p-6 space-y-6">
+             <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 group-focus-within:text-primary transition-colors" />
+                <input type="text" placeholder="Search items, tools, seeds..." className="w-full bg-white border border-neutral-200 rounded-2xl py-4 pl-12 pr-4 font-bold shadow-sm focus:ring-2 focus:ring-primary outline-none transition-all" />
+             </div>
+             
+             <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 no-scrollbar">
+                {['All', 'Farming', 'Tech', 'Tools', 'Food', 'Clothing'].map((c, i) => (
+                   <button key={i} className={`flex-none px-6 py-2.5 rounded-full font-black text-sm transition-all duration-300 ${i === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white border border-neutral-100 text-neutral-500 hover:border-primary/30'}`}>{c}</button>
+                ))}
+             </div>
+
+             <div className="grid grid-cols-1 gap-6">
+                {listings.map((item) => (
+                   <div key={item.id} className="bg-white rounded-[40px] overflow-hidden border border-neutral-100 shadow-sm hover:shadow-xl transition-all duration-500 group">
+                      <div className="h-64 relative overflow-hidden">
+                         <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-2xl shadow-lg border border-white/20">
+                            <p className="font-black text-primary text-lg">ZMW {item.price}</p>
+                         </div>
+                         <div className="absolute bottom-4 left-4 bg-primary text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
+                            {item.category}
+                         </div>
+                      </div>
+                      <div className="p-8">
+                         <div className="flex justify-between items-start mb-3">
+                            <h3 className="text-xl font-black text-foreground leading-tight group-hover:text-primary transition-colors">{item.title}</h3>
+                            <button className="p-2 hover:bg-neutral-50 rounded-full transition-colors"><Heart className="w-6 h-6 text-neutral-300 hover:text-red-500" /></button>
+                         </div>
+                         <p className="text-neutral-500 font-medium text-sm mb-6 line-clamp-2 leading-relaxed">{item.desc}</p>
+                         <div className="flex items-center justify-between pt-6 border-t border-neutral-50">
+                            <div className="flex items-center gap-2">
+                               <MapPin className="w-4 h-4 text-neutral-400" />
+                               <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{item.location}</span>
+                            </div>
+                            <span className="text-xs font-bold text-neutral-300 italic">{item.time}</span>
+                         </div>
+                      </div>
+                   </div>
+                ))}
+                {loadingListings && (
+                   <div className="space-y-6 animate-pulse p-4">
+                      {[1, 2].map(i => <div key={i} className="h-96 bg-neutral-100 rounded-[40px]"></div>)}
+                   </div>
+                )}
+             </div>
+          </div>
+       </div>
+    );
+  };
 
   const screenMap: Record<Screen, () => JSX.Element> = {
     onboarding: OnboardingScreen,
@@ -757,7 +901,14 @@ export default function TumaworksApp() {
     <div className="bg-neutral-900 min-h-screen flex justify-center">
       {/* Mobile Frame / App Container */}
       <div className="w-full max-w-md bg-white min-h-screen flex flex-col relative shadow-2xl">
-        <CurrentScreen />
+        {loading ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
+             <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+             <p className="font-black text-primary animate-pulse tracking-widest uppercase text-xs">Tumaworks Production Logic Loading...</p>
+          </div>
+        ) : (
+          <CurrentScreen />
+        )}
 
         {/* Sticky Bottom Navigation - fully interactive */}
         {showBottomNav && (
