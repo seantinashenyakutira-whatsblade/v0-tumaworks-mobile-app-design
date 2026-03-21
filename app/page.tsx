@@ -6,7 +6,7 @@ import {
   Clock, DollarSign, ChevronRight, Search, ArrowRight, Eye, Send, Menu, X,
   ShoppingBag, Wrench, Car, Briefcase, Camera, Grid, List, Tag, Share2, Phone,
   Droplets, Hammer, PenTool, Flame, ArrowLeft, Navigation, Edit3, Image as ImageIcon,
-  CheckCircle, PlusCircle, Filter, Baby, ShoppingCart
+  CheckCircle, PlusCircle, Filter, Baby, ShoppingCart, WashingMachine
 } from 'lucide-react';
 
 type Screen =
