@@ -1,35 +1,70 @@
-# v0-tumaworks-mobile-app-design
+# 🇿🇲 Tumaworks: The Super App for Zambia
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+Tumaworks is a production-grade marketplace platform designed to connect Zambian service providers with clients. From daily piecework to specialized technical services, Tumaworks bridges the gap with a scalable, AI-ready architecture.
 
-## Built with v0
+## 🚀 Key Features
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+*   **Massive Marketplace**: Programmatic seeding of over **10,000 piecework services** across 10+ categories.
+*   **Dual-Role Support**: Switch between **Client** and **Worker** modes instantly with real-time profile logic.
+*   **Weighted Matching Algorithm**: Advanced ranking that prioritizes verified (Premium) workers, high proximity, and top ratings.
+*   **Secure Payments & Escrow**: Integrated with **Flutterwave** (test keys) for mobile money and card payments, featuring secure escrow release upon task completion.
+*   **Real-time Communication**: Firebase-powered chat system for seamless negotiation and booking.
+*   **Premium Aesthetics**: High-fidelity mobile-first design with a focus on usability and fast interactions.
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_H0zaSjxVc9AXNKTo55Xb2Fxuy1yu)
+## 🛠️ Tech Stack
 
-## Getting Started
+*   **Frontend**: React (Next.js App Router), Tailwind CSS, Lucide icons.
+*   **Backend**: Firebase (Authentication, Firestore, Storage, Cloud Functions).
+*   **Payments**: Flutterwave (Zambia Mobile Money integration).
+*   **Persistence**: Real-time Firebase Auth state sync.
 
-First, run the development server:
+## 📁 System Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+```mermaid
+graph TD
+    User-->AuthService[Firebase Auth]
+    AuthService-->Firestore[(Cloud Firestore)]
+    User-->DBService[Database Service]
+    DBService-->Tasks[Tasks Collection]
+    DBService-->Marketplace[Marketplace Feed]
+    Marketplace-->MatchingAlgorithm[Weighted Scoring]
+    User-->PaymentService[Flutterwave / Escrow]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ⚙️ Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Prerequisites
+- Node.js (v18+)
+- A Firebase Project ([https://console.firebase.google.com/](https://console.firebase.google.com/))
 
-## Learn More
+### 2. Installation
+```bash
+npm install
+```
 
-To learn more, take a look at the following resources:
+### 3. Environment Setup
+Create a `.env.local` file with your Firebase credentials:
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+### 4. Running Locally
+```bash
+npm run dev
+```
 
-<a href="https://v0.app/chat/api/kiro/clone/seantinashenyakutira-whatsblade/v0-tumaworks-mobile-app-design" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+## 📊 Scale & Data
+The `app/services/serviceData.ts` file contains the logic that programmatically seeds the platform with over **10,000 services** covering:
+- **Daily**: Laundry, Cleaning, Cooking.
+- **Frequent**: Babysitting, Tutoring, Gardening.
+- **Occasional**: Event planning, DJs, Catering.
+- **Specialized**: IT Support, Electricians, Plumbers.
+
+---
+
+Built with ❤️ for Zambia using **Antigravity AI**.
