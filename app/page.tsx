@@ -134,7 +134,6 @@ export default function TumaworksApp() {
        setAuthLoading(true);
        try { 
          await AuthService.login(email, password); 
-         // Success handled by onAuthStateChange in useEffect
        } 
        catch (err: any) { alert('Login failed: ' + err.message); } 
        finally { setAuthLoading(false); }
@@ -185,15 +184,11 @@ export default function TumaworksApp() {
     const [authLoading, setAuthLoading] = useState(false);
 
     const handleSignup = async () => {
-       if (!email || !password || !name) return alert('Please fill in all fields');
+       if (!email || !password || !name) return alert('Fill all fields');
        setAuthLoading(true);
-       try {
-          await AuthService.signup(email, password, name, userRole);
-       } catch (err: any) {
-          alert('Signup failed: ' + err.message);
-       } finally {
-          setAuthLoading(false);
-       }
+       try { await AuthService.signup(email, password, name, userRole); } 
+       catch (err: any) { alert('Signup failed: ' + err.message); } 
+       finally { setAuthLoading(false); }
     };
 
     return (
