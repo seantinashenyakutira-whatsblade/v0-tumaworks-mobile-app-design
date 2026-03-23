@@ -130,27 +130,12 @@ export default function TumaworksApp() {
     const [authLoading, setAuthLoading] = useState(false);
 
     const handleLogin = async () => {
-       if (!email || !password) return alert('Please fill in all fields');
-       setAuthLoading(true);
-       try {
-          await AuthService.login(email, password);
-          // navigate('dashboard') happens via useEffect
-       } catch (err: any) {
-          alert('Login failed: ' + err.message);
-       } finally {
-          setAuthLoading(false);
-       }
-    };
-
-  const SignInScreen = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [authLoading, setAuthLoading] = useState(false);
-
-    const handleLogin = async () => {
        if (!email || !password) return alert('Fill all fields');
        setAuthLoading(true);
-       try { await AuthService.login(email, password); } 
+       try { 
+         await AuthService.login(email, password); 
+         // Success handled by onAuthStateChange in useEffect
+       } 
        catch (err: any) { alert('Login failed: ' + err.message); } 
        finally { setAuthLoading(false); }
     };
@@ -190,7 +175,6 @@ export default function TumaworksApp() {
         </div>
       </div>
     );
-  };
   };
 
   const SignUpScreen = () => {
