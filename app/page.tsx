@@ -196,7 +196,11 @@ export default function TumaworksApp() {
        setAuthLoading(true);
        try { await AuthService.signup(email, password, name, userRole); } 
        catch (err: any) { 
-         setError(err.message || 'Signup failed. Please try again.');
+         let msg = err.message || 'Signup failed. Please try again.';
+         if (msg.includes('api-key-not-valid')) {
+           msg = 'Firebase API Key is invalid or missing. Please check your Vercel Environment Variables.';
+         }
+         setError(msg);
        } 
        finally { setAuthLoading(false); }
     };
