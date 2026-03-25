@@ -5,6 +5,7 @@ import {
   updateDoc, 
   doc, 
   getDoc, 
+  setDoc,
   query, 
   where, 
   orderBy, 
@@ -16,7 +17,7 @@ import {
 } from 'firebase/firestore';
 import { db, storage } from '../lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { UserProfile, Task, Transaction, Message, Chat } from '../types';
+import { UserProfile, Task, Transaction, Message, Chat, TaskStatus } from '../types';
 
 export class DBService {
   // --- USERS ---
@@ -26,14 +27,14 @@ export class DBService {
   }
 
   static async createUserProfile(userId: string, profile: Partial<UserProfile>) {
-    await updateDoc(doc(db, 'users', userId), {
+    await setDoc(doc(db, 'users', userId), {
       ...profile,
       id: userId,
       createdAt: serverTimestamp(),
       walletBalance: 0,
       rating: 5.0,
       reviewsCount: 0,
-    });
+    }, { merge: true });
   }
 
   // --- TASKS ---

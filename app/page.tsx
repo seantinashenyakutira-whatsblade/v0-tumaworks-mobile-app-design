@@ -46,7 +46,18 @@ export default function TumaworksApp() {
   useEffect(() => {
     const unsub = AuthService.onAuthStateChange(async (firebaseUser) => {
        if (firebaseUser) {
-          const profile = await DBService.getUserProfile(firebaseUser.uid);
+          let profile = await DBService.getUserProfile(firebaseUser.uid);
+          
+          // Self-healing: Create profile if missing
+          if (!profile) {
+            await DBService.createUserProfile(firebaseUser.uid, {
+               name: firebaseUser.displayName || 'Anonymous User',
+               email: firebaseUser.email || '',
+               role: 'client'
+            });
+            profile = await DBService.getUserProfile(firebaseUser.uid);
+          }
+
           setUser(profile);
           if (profile) setRole(profile.role);
           setCurrentScreen('dashboard');
