@@ -122,7 +122,7 @@ export default function TumaworksApp() {
         </div>
         
         <div className="space-y-4">
-          <h1 className="text-6xl font-black text-foreground mb-4 tracking-tighter leading-none">Tuma<br/><span className="text-primary">works.</span></h1>
+          <h1 className="text-6xl font-bold text-foreground mb-4 tracking-tighter leading-none">Tuma<br/><span className="text-primary">works.</span></h1>
           <p className="text-xl text-neutral-500 font-bold tracking-tight">
             Connect. Hire. Grow. <br/><span className="text-neutral-400 font-medium">Zambia's #1 Service App.</span>
           </p>
@@ -134,7 +134,7 @@ export default function TumaworksApp() {
                  <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                 <p className="font-black text-sm uppercase tracking-widest text-primary">Find Experts</p>
+                 <p className="font-bold text-sm  tracking-widest text-primary">Find Experts</p>
                  <p className="text-xs text-neutral-400 font-bold">Safe and Secure</p>
               </div>
            </div>
@@ -142,7 +142,7 @@ export default function TumaworksApp() {
            <button onClick={() => navigate('signin')} className={`w-full ${btnPrimary} mt-4`}>
              Start Now
            </button>
-           <button onClick={() => { setShowTutorial(true); setTutorialStep(0); }} className="w-full mt-4 py-4 border-2 border-primary/20 text-primary font-black rounded-3xl text-[10px] uppercase tracking-widest hover:bg-primary/5 transition-all">
+           <button onClick={() => { setShowTutorial(true); setTutorialStep(0); }} className="w-full mt-4 py-4 border-2 border-primary/20 text-primary font-bold rounded-3xl text-[10px]  tracking-widest hover:bg-primary/5 transition-all">
              How it works
            </button>
         </div>
@@ -182,33 +182,33 @@ export default function TumaworksApp() {
         <div className="w-24 h-24 bg-primary rounded-[32px] flex items-center justify-center mb-12 shadow-2xl shadow-primary/40 animate-float relative z-10">
            <Zap className="w-12 h-12 text-white fill-white"/>
         </div>
-        <h1 className="text-5xl font-black text-white mb-4 tracking-tighter uppercase relative z-10">Sign In</h1>
-        <p className="text-neutral-500 font-black tracking-[0.2em] uppercase text-[10px] mb-12 relative z-10 text-center">Welcome back to Tumaworks</p>
+        <h1 className="text-5xl font-bold text-white mb-4 tracking-tighter  relative z-10">Sign In</h1>
+        <p className="text-neutral-500 font-bold tracking-[0.2em]  text-[10px] mb-12 relative z-10 text-center">Welcome back to Tumaworks</p>
         
         <div className="w-full space-y-4 max-w-sm relative z-10">
           <div className="relative group">
             <div className="absolute inset-0 bg-white/5 rounded-[24px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
             <div className="relative bg-white/10 backdrop-blur-2xl border border-white/10 rounded-[28px] p-1 flex items-center">
                <div className="w-12 h-12 flex items-center justify-center text-white/40"><Search className="w-5 h-5" /></div>
-               <input type="email" placeholder="EMAIL ADDRESS" value={email} onChange={(e)=>setEmail(e.target.value)} className="flex-1 bg-transparent py-4 font-black text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] uppercase" />
+               <input type="email" placeholder="EMAIL ADDRESS" value={email} onChange={(e)=>setEmail(e.target.value)} className="flex-1 bg-transparent py-4 font-bold text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] " />
             </div>
           </div>
           <div className="relative group">
             <div className="absolute inset-0 bg-white/5 rounded-[24px] blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
             <div className="relative bg-white/10 backdrop-blur-2xl border border-white/10 rounded-[28px] p-1 flex items-center">
                <div className="w-12 h-12 flex items-center justify-center text-white/40"><ShieldCheck className="w-5 h-5" /></div>
-               <input type="password" placeholder="PASSWORD" value={password} onChange={(e)=>setPassword(e.target.value)} className="flex-1 bg-transparent py-4 font-black text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] uppercase" />
+               <input type="password" placeholder="PASSWORD" value={password} onChange={(e)=>setPassword(e.target.value)} className="flex-1 bg-transparent py-4 font-bold text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] " />
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest text-center animate-shake mt-2 px-4">{error}</p>}
+          {error && <p className="text-red-500 text-[10px] font-bold  tracking-widest text-center animate-shake mt-2 px-4">{error}</p>}
           
-          <button onClick={handleLogin} disabled={authLoading} className="w-full py-6 bg-primary text-white font-black rounded-[32px] text-xs uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-95 transition-all flex justify-center items-center gap-4 mt-6">
+          <button onClick={handleLogin} disabled={authLoading} className="w-full py-6 bg-primary text-white font-bold rounded-[32px] text-xs  tracking-[0.3em] shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-95 transition-all flex justify-center items-center gap-4 mt-6">
              {authLoading ? <div className="w-6 h-6 border-[3px] border-white/30 border-t-white rounded-full animate-spin"></div> : <>Sign In <ArrowRight className="w-5 h-5"/></>}
           </button>
         </div>
         
-        <div className="mt-12 text-neutral-500 font-black text-[10px] uppercase tracking-[0.2em] flex gap-4 relative z-10">
+        <div className="mt-12 text-neutral-500 font-bold text-[10px]  tracking-[0.2em] flex gap-4 relative z-10">
            New here? <button onClick={() => navigate('signup')} className="text-white hover:text-primary transition-colors">Create Account</button>
         </div>
       </div>
@@ -249,39 +249,39 @@ export default function TumaworksApp() {
 
     return (
       <div className="min-h-screen bg-neutral-900 py-16 px-10 flex flex-col items-center justify-center page-transition overflow-y-auto">
-        <h1 className="text-5xl font-black text-white mb-4 tracking-tighter uppercase relative z-10 text-center">Sign Up</h1>
-        <p className="text-neutral-500 font-black tracking-[0.2em] uppercase text-[10px] mb-12 relative z-10 text-center">Join Zambia's #1 Service App</p>
+        <h1 className="text-5xl font-bold text-white mb-4 tracking-tighter  relative z-10 text-center">Sign Up</h1>
+        <p className="text-neutral-500 font-bold tracking-[0.2em]  text-[10px] mb-12 relative z-10 text-center">Join Zambia's #1 Service App</p>
         
         <div className="w-full space-y-4 max-w-sm relative z-10">
           <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[28px] p-1">
-             <input type="text" placeholder="FULL NAME" value={name} onChange={(e)=>setName(e.target.value)} className="w-full bg-transparent p-4 font-black text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] uppercase" />
+             <input type="text" placeholder="FULL NAME" value={name} onChange={(e)=>setName(e.target.value)} className="w-full bg-transparent p-4 font-bold text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] " />
           </div>
           <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[28px] p-1">
-             <input type="email" placeholder="EMAIL ADDRESS" value={email} onChange={(e)=>setEmail(e.target.value)} className="w-full bg-transparent p-4 font-black text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] uppercase" />
+             <input type="email" placeholder="EMAIL ADDRESS" value={email} onChange={(e)=>setEmail(e.target.value)} className="w-full bg-transparent p-4 font-bold text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] " />
           </div>
           <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[28px] p-1">
-             <input type="password" placeholder="CREATE PASSWORD" value={password} onChange={(e)=>setPassword(e.target.value)} className="w-full bg-transparent p-4 font-black text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] uppercase" />
+             <input type="password" placeholder="CREATE PASSWORD" value={password} onChange={(e)=>setPassword(e.target.value)} className="w-full bg-transparent p-4 font-bold text-white focus:outline-none placeholder:text-neutral-600 tracking-wider text-[11px] " />
           </div>
           
           <div className="bg-white/5 backdrop-blur-2xl rounded-[32px] border border-white/10 p-6">
-             <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] mb-4 text-center">I want to...</p>
+             <p className="text-[10px] font-bold text-neutral-500  tracking-[0.2em] mb-4 text-center">I want to...</p>
              <div className="flex gap-4">
                 {['client', 'worker'].map((r) => (
-                   <button key={r} onClick={() => setUserRole(r as UserRole)} className={`flex-1 py-4 rounded-[20px] font-black uppercase text-[10px] tracking-widest transition-all duration-500 ${userRole === r ? 'bg-primary text-white shadow-2xl shadow-primary/40 scale-105' : 'bg-white/5 text-neutral-500 hover:text-white'}`}>
+                   <button key={r} onClick={() => setUserRole(r as UserRole)} className={`flex-1 py-4 rounded-[20px] font-bold  text-[10px] tracking-widest transition-all duration-500 ${userRole === r ? 'bg-primary text-white shadow-2xl shadow-primary/40 scale-105' : 'bg-white/5 text-neutral-500 hover:text-white'}`}>
                       {r === 'client' ? 'Hire' : 'Work'}
                    </button>
                 ))}
              </div>
           </div>
 
-          {error && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest text-center animate-shake mt-2 px-4">{error}</p>}
+          {error && <p className="text-red-500 text-[10px] font-bold  tracking-widest text-center animate-shake mt-2 px-4">{error}</p>}
 
-          <button onClick={handleSignup} disabled={authLoading} className="w-full py-6 bg-primary text-white font-black rounded-[32px] text-xs uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-95 transition-all flex justify-center items-center gap-4 mt-6">
+          <button onClick={handleSignup} disabled={authLoading} className="w-full py-6 bg-primary text-white font-bold rounded-[32px] text-xs  tracking-[0.3em] shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-95 transition-all flex justify-center items-center gap-4 mt-6">
              {authLoading ? <div className="w-6 h-6 border-[3px] border-white/30 border-t-white rounded-full animate-spin"></div> : <>Create Account <ArrowRight className="w-5 h-5"/></>}
           </button>
         </div>
         
-        <div className="mt-12 text-neutral-500 font-black text-[10px] uppercase tracking-[0.2em] flex gap-4 relative z-10">
+        <div className="mt-12 text-neutral-500 font-bold text-[10px]  tracking-[0.2em] flex gap-4 relative z-10">
            Have an account? <button onClick={() => navigate('signin')} className="text-white hover:text-primary transition-colors">Sign In</button>
         </div>
       </div>
@@ -299,8 +299,8 @@ export default function TumaworksApp() {
         <div className="relative z-10 space-y-8">
           <div className="flex justify-between items-center">
             <div className="animate-slideUp">
-              <p className="text-white/60 text-xs font-black uppercase tracking-[0.2em]">Welcome,</p>
-              <h1 className="text-3xl font-black text-white tracking-tighter">{user?.name?.split(' ')[0] || 'User'}</h1>
+              <p className="text-white/60 text-xs font-bold  tracking-[0.2em]">Welcome,</p>
+              <h1 className="text-3xl font-bold text-white tracking-tighter">{user?.name?.split(' ')[0] || 'User'}</h1>
             </div>
             <div className="flex gap-3">
               <button onClick={() => navigate('notifications')} className="w-12 h-12 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all active:scale-95 relative">
@@ -316,16 +316,16 @@ export default function TumaworksApp() {
           <div className={glassCard + " !p-6 border-white/30 text-white bg-gradient-to-br from-white/20 to-transparent shadow-neutral-900/10"}>
             <div className="flex justify-between items-start">
                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-white/70 mb-1">Wallet Balance</p>
-                  <p className="text-5xl font-black tracking-tighter leading-none">ZMW {user?.walletBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</p>
+                  <p className="text-[10px] font-bold  tracking-widest text-white/70 mb-1">Wallet Balance</p>
+                  <p className="text-5xl font-bold tracking-tighter leading-none">ZMW {user?.walletBalance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}</p>
                </div>
                <div className="p-3 bg-accent text-accent-foreground rounded-2xl animate-float">
                   <Wallet className="w-6 h-6" />
                </div>
             </div>
             <div className="flex gap-4 mt-8">
-              <button className="flex-1 bg-white text-primary rounded-3xl py-4 text-xs font-black uppercase tracking-widest hover:bg-neutral-100 transition-all active:scale-95 shadow-xl">Withdraw</button>
-              <button className="flex-1 bg-accent/90 text-accent-foreground rounded-3xl py-4 text-xs font-black uppercase tracking-widest hover:bg-accent transition-all active:scale-95 shadow-xl shadow-accent/20">Add Funds</button>
+              <button className="flex-1 bg-white text-primary rounded-3xl py-4 text-xs font-bold  tracking-widest hover:bg-neutral-100 transition-all active:scale-95 shadow-xl">Withdraw</button>
+              <button className="flex-1 bg-accent/90 text-accent-foreground rounded-3xl py-4 text-xs font-bold  tracking-widest hover:bg-accent transition-all active:scale-95 shadow-xl shadow-accent/20">Add Funds</button>
             </div>
           </div>
         </div>
@@ -349,7 +349,7 @@ export default function TumaworksApp() {
         {/* Categories Bar */}
         <div className="animate-slideUp" style={{animationDelay: '0.2s'}}>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-black text-foreground tracking-tight">Browse Categories</h2>
+            <h2 className="text-2xl font-bold text-foreground tracking-tight">Browse Categories</h2>
              <button onClick={() => navigate('browse-services')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-neutral-100 shadow-sm hover:bg-primary hover:text-white transition-all">
                 <ChevronRight className="w-5 h-5" />
              </button>
@@ -370,7 +370,7 @@ export default function TumaworksApp() {
                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                    <cat.icon className="w-8 h-8 text-white relative z-10" />
                 </div>
-                <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest text-center truncate w-full">{cat.label}</span>
+                <span className="text-[10px] font-bold text-neutral-500  tracking-widest text-center truncate w-full">{cat.label}</span>
               </button>
             ))}
           </div>
@@ -379,8 +379,8 @@ export default function TumaworksApp() {
         {/* Featured Workers List */}
         <div className="animate-slideUp" style={{animationDelay: '0.3s'}}>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-black text-foreground tracking-tight">Experts Near You</h2>
-            <button className="text-[10px] font-black uppercase text-primary tracking-widest border-b-2 border-primary/20 pb-1">Show on map</button>
+            <h2 className="text-2xl font-bold text-foreground tracking-tight">Experts Near You</h2>
+            <button className="text-[10px] font-bold  text-primary tracking-widest border-b-2 border-primary/20 pb-1">Show on map</button>
           </div>
           <div className="space-y-6">
             {[
@@ -397,19 +397,19 @@ export default function TumaworksApp() {
                 </div>
                 <div className="flex-1 space-y-1">
                    <div className="flex items-center gap-2">
-                      <h3 className="font-black text-foreground text-lg tracking-tight leading-none">{worker.name}</h3>
+                      <h3 className="font-bold text-foreground text-lg tracking-tight leading-none">{worker.name}</h3>
                       <div className="flex items-center gap-1 bg-yellow-400/10 px-2 py-0.5 rounded-lg">
                          <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                         <span className="text-[10px] font-black text-yellow-700">{worker.rating}</span>
+                         <span className="text-[10px] font-bold text-yellow-700">{worker.rating}</span>
                       </div>
                    </div>
                    <p className="text-sm font-bold text-neutral-400">{worker.role}</p>
                    <div className="flex items-center gap-4 pt-2">
-                      <div className="flex items-center gap-1 text-[10px] font-black text-neutral-400 uppercase tracking-widest">
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-neutral-400  tracking-widest">
                          <MapPin className="w-3 h-3" />
                          {worker.dist}
                       </div>
-                      <p className="text-primary font-black text-sm">from {worker.price}</p>
+                      <p className="text-primary font-bold text-sm">from {worker.price}</p>
                    </div>
                 </div>
               </div>
@@ -455,8 +455,8 @@ export default function TumaworksApp() {
             <button onClick={() => navigate('dashboard')} className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-95">
               <ArrowLeft className="w-6 h-6" />
             </button>
-            <h1 className="text-2xl font-black text-foreground tracking-tighter uppercase whitespace-nowrap">Browse Services</h1>
-            <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary font-black text-xs uppercase tracking-widest">
+            <h1 className="text-2xl font-bold text-foreground tracking-tighter  whitespace-nowrap">Browse Services</h1>
+            <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary font-bold text-xs  tracking-widest">
                NEW
             </div>
           </div>
@@ -472,7 +472,7 @@ export default function TumaworksApp() {
                  placeholder="Search for repair, home, food..." 
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="flex-1 bg-transparent py-4 font-black text-neutral-800 focus:outline-none placeholder:text-neutral-300 tracking-tight" 
+                 className="flex-1 bg-transparent py-4 font-bold text-neutral-800 focus:outline-none placeholder:text-neutral-300 tracking-tight" 
                />
             </div>
           </div>
@@ -482,7 +482,7 @@ export default function TumaworksApp() {
               <button 
                 key={i} 
                 onClick={() => { setActiveTab(t); }}
-                className={`py-4 px-8 rounded-[30px] font-black text-[10px] uppercase tracking-[0.2em] whitespace-nowrap transition-all duration-500 ${activeTab === t ? 'bg-primary text-white shadow-2xl shadow-primary/20 scale-105' : 'bg-white text-neutral-400 border border-neutral-100 hover:border-primary/20'}`}
+                className={`py-4 px-8 rounded-[30px] font-bold text-[10px]  tracking-[0.2em] whitespace-nowrap transition-all duration-500 ${activeTab === t ? 'bg-primary text-white shadow-2xl shadow-primary/20 scale-105' : 'bg-white text-neutral-400 border border-neutral-100 hover:border-primary/20'}`}
               >
                 {t}
               </button>
@@ -500,18 +500,18 @@ export default function TumaworksApp() {
                 <div className="flex-1 space-y-2">
                   <div className="flex justify-between items-start">
                     <div>
-                       <h3 className="text-2xl font-black text-foreground leading-none tracking-tight group-hover:text-primary transition-colors">{srv.name}</h3>
-                       <p className="text-[10px] uppercase font-black text-primary tracking-[0.2em] mt-2 inline-block bg-primary/5 px-3 py-1 rounded-full">{srv.category}</p>
+                       <h3 className="text-2xl font-bold text-foreground leading-none tracking-tight group-hover:text-primary transition-colors">{srv.name}</h3>
+                       <p className="text-[10px]  font-bold text-primary tracking-[0.2em] mt-2 inline-block bg-primary/5 px-3 py-1 rounded-full">{srv.category}</p>
                     </div>
                     <div className="flex items-center gap-1 bg-yellow-400/10 px-3 py-1 rounded-2xl">
                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                       <span className="text-[10px] font-black text-yellow-700">{srv.rating}</span>
+                       <span className="text-[10px] font-bold text-yellow-700">{srv.rating}</span>
                     </div>
                   </div>
                   <p className="text-neutral-400 font-bold text-sm line-clamp-2 leading-relaxed tracking-tight">{srv.shortDescription}</p>
                   <div className="flex items-center justify-between pt-6 mt-4 border-t border-neutral-50">
-                    <span className="font-black text-primary text-xl tracking-tighter">{srv.price}</span>
-                    <button className="bg-neutral-900 text-white font-black px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-xl">Contact Pro</button>
+                    <span className="font-bold text-primary text-xl tracking-tighter">{srv.price}</span>
+                    <button className="bg-neutral-900 text-white font-bold px-6 py-3 rounded-2xl text-[10px]  tracking-widest hover:bg-primary transition-all shadow-xl">Contact Pro</button>
                   </div>
                 </div>
               </div>
@@ -521,7 +521,7 @@ export default function TumaworksApp() {
           {loading && (
             <div className="py-20 flex flex-col items-center justify-center gap-4">
                <div className="w-14 h-14 border-[6px] border-primary/10 border-t-primary rounded-full animate-spin"></div>
-               <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em]">Synching Elite Data...</p>
+               <p className="text-[10px] font-bold  text-primary tracking-[0.3em]">Synching Elite Data...</p>
             </div>
           )}
         </div>
@@ -541,8 +541,8 @@ export default function TumaworksApp() {
             <button onClick={() => navigate('dashboard')} className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-95">
               <ArrowLeft className="w-6 h-6" />
             </button>
-            <h1 className="text-2xl font-black text-foreground tracking-tighter uppercase whitespace-nowrap">Post a Job</h1>
-            <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary font-black text-xs uppercase tracking-widest">
+            <h1 className="text-2xl font-bold text-foreground tracking-tighter  whitespace-nowrap">Post a Job</h1>
+            <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary font-bold text-xs  tracking-widest">
                HELP
             </div>
           </div>
@@ -551,17 +551,17 @@ export default function TumaworksApp() {
         <div className="px-8 py-10 space-y-12">
           {/* PHOTO SECTION */}
           <div className="space-y-4">
-             <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] ml-2">Show us (Photo)</label>
+             <label className="text-[10px] font-bold text-neutral-400  tracking-[0.4em] ml-2">Show us (Photo)</label>
              <button className="w-full h-48 bg-white border-2 border-dashed border-neutral-200 rounded-[40px] flex flex-col items-center justify-center gap-4 hover:border-primary/40 transition-all group overflow-hidden relative">
                 <Camera className="w-10 h-10 text-neutral-300 group-hover:text-primary transition-colors" />
-                <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Add a photo of the problem</p>
+                <p className="text-[10px] font-bold text-neutral-400  tracking-widest">Add a photo of the problem</p>
              </button>
           </div>
 
           <div className="space-y-4">
-             <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] ml-2">What service do you need?</label>
+             <label className="text-[10px] font-bold text-neutral-400  tracking-[0.4em] ml-2">What service do you need?</label>
              <div className="bg-white border border-neutral-100 rounded-[30px] p-2">
-                <select className="w-full bg-transparent px-6 py-4 font-black text-foreground focus:outline-none appearance-none cursor-pointer uppercase text-xs tracking-widest">
+                <select className="w-full bg-transparent px-6 py-4 font-bold text-foreground focus:outline-none appearance-none cursor-pointer  text-xs tracking-widest">
                    <option>Repair (Plumbing/Electric)</option>
                    <option>Home (Cleaning/Laundry)</option>
                    <option>Food (Delivery/Cooking)</option>
@@ -571,9 +571,9 @@ export default function TumaworksApp() {
           </div>
           
           <div className="space-y-4">
-            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] ml-2">Tell us more details</label>
+            <label className="text-[10px] font-bold text-neutral-400  tracking-[0.4em] ml-2">Tell us more details</label>
             <div className="bg-white border border-neutral-100 rounded-[40px] p-2 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
-               <textarea placeholder="DESCRIBE WHAT YOU NEED... (EG. FIXING A LEAKY SINK)" className="w-full bg-transparent p-6 text-foreground focus:outline-none h-40 resize-none font-black text-xs tracking-widest uppercase placeholder:text-neutral-200" />
+               <textarea placeholder="DESCRIBE WHAT YOU NEED... (EG. FIXING A LEAKY SINK)" className="w-full bg-transparent p-6 text-foreground focus:outline-none h-40 resize-none font-bold text-xs tracking-widest  placeholder:text-neutral-200" />
             </div>
           </div>
 
@@ -581,13 +581,13 @@ export default function TumaworksApp() {
             <div className="absolute top-[-20%] right-[-10%] w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700"></div>
             <div className="relative z-10">
                <div className="flex justify-between items-center mb-10">
-                  <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Suggested Pay</label>
+                  <label className="text-[10px] font-bold text-white/40  tracking-[0.4em]">Suggested Pay</label>
                   <div className="bg-white/10 backdrop-blur-xl px-6 py-2 rounded-2xl border border-white/10">
-                    <span className="font-black text-primary text-2xl tracking-tighter">ZMW {budget}</span>
+                    <span className="font-bold text-primary text-2xl tracking-tighter">ZMW {budget}</span>
                   </div>
                </div>
                <input type="range" min="50" max="5000" step="10" value={budget} onChange={(e) => setBudget(Number(e.target.value))} className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary" />
-               <div className="flex justify-between text-[8px] text-white/30 font-black uppercase tracking-widest mt-6">
+               <div className="flex justify-between text-[8px] text-white/30 font-bold  tracking-widest mt-6">
                  <span>Standard Rate</span>
                  <span>Fast Connect (Higher Pay)</span>
                </div>
@@ -595,20 +595,20 @@ export default function TumaworksApp() {
           </div>
 
           <div className="space-y-4">
-            <label className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.4em] ml-2">Where do you need help?</label>
+            <label className="text-[10px] font-bold text-neutral-400  tracking-[0.4em] ml-2">Where do you need help?</label>
             <div className="relative group">
               <div className="absolute inset-0 bg-primary/5 rounded-[30px] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
               <div className="relative bg-white border border-neutral-100 rounded-[30px] p-2 flex items-center">
                  <div className="w-12 h-12 flex items-center justify-center text-primary"><MapPin className="w-6 h-6" /></div>
-                 <input type="text" placeholder="SEARCH OR USE MAP..." className="flex-1 bg-transparent py-4 font-black text-foreground focus:outline-none placeholder:text-neutral-200 text-[10px] tracking-widest" />
-                 <button className="bg-neutral-900 text-white rounded-2xl px-4 py-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-all active:scale-95 shadow-lg">
+                 <input type="text" placeholder="SEARCH OR USE MAP..." className="flex-1 bg-transparent py-4 font-bold text-foreground focus:outline-none placeholder:text-neutral-200 text-[10px] tracking-widest" />
+                 <button className="bg-neutral-900 text-white rounded-2xl px-4 py-3 flex items-center gap-2 text-[10px] font-bold  tracking-widest hover:bg-primary transition-all active:scale-95 shadow-lg">
                    <Navigation className="w-4 h-4" /> GPS
                  </button>
               </div>
             </div>
           </div>
 
-          <button onClick={() => navigate('map-booking')} className="w-full py-7 bg-primary text-white font-black rounded-[40px] text-xs uppercase tracking-[0.4em] shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-95 transition-all mt-10">
+          <button onClick={() => navigate('map-booking')} className="w-full py-7 bg-primary text-white font-bold rounded-[40px] text-xs  tracking-[0.4em] shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-95 transition-all mt-10">
             Find Help Near Me
           </button>
         </div>
@@ -637,8 +637,8 @@ export default function TumaworksApp() {
       <div className="px-8 -mt-10 relative z-20 space-y-10">
         <div className="flex justify-between items-center group">
            <div className="space-y-1">
-              <h2 className="text-3xl font-black text-foreground tracking-tighter uppercase leading-none">Workers nearby</h2>
-              <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em]">Verified Workers</p>
+              <h2 className="text-3xl font-bold text-foreground tracking-tighter  leading-none">Workers nearby</h2>
+              <p className="text-[10px] font-bold  text-primary tracking-[0.3em]">Verified Workers</p>
            </div>
            <button className="bg-white p-4 rounded-3xl shadow-xl hover:bg-neutral-900 hover:text-white transition-all duration-500 active:scale-95 group-hover:rotate-12 border border-neutral-100">
               <Filter className="w-6 h-6" />
@@ -657,17 +657,17 @@ export default function TumaworksApp() {
                <div className="flex-1 space-y-2 text-left">
                   <div className="flex justify-between items-start">
                      <div>
-                        <h3 className="text-xl font-black text-foreground tracking-tight leading-none group-hover:text-primary transition-colors">{w.name}</h3>
-                        <p className="text-[10px] uppercase font-black text-neutral-400 tracking-[0.2em] mt-2">{w.role}</p>
+                        <h3 className="text-xl font-bold text-foreground tracking-tight leading-none group-hover:text-primary transition-colors">{w.name}</h3>
+                        <p className="text-[10px]  font-bold text-neutral-400 tracking-[0.2em] mt-2">{w.role}</p>
                      </div>
                      <div className="flex items-center gap-1 bg-yellow-400/10 px-3 py-1 rounded-xl">
                         <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <span className="text-[10px] font-black text-yellow-700">{w.r}</span>
+                        <span className="text-[10px] font-bold text-yellow-700">{w.r}</span>
                      </div>
                   </div>
                   <div className="flex items-center justify-between pt-4 mt-2 border-t border-neutral-50">
-                    <span className="font-black text-primary text-lg tracking-tighter">ZMW {w.p}</span>
-                    <span className="text-[10px] font-black uppercase text-neutral-300 tracking-[0.2em]">{w.dist} away</span>
+                    <span className="font-bold text-primary text-lg tracking-tighter">ZMW {w.p}</span>
+                    <span className="text-[10px] font-bold  text-neutral-300 tracking-[0.2em]">{w.dist} away</span>
                   </div>
                </div>
             </div>
@@ -692,11 +692,11 @@ export default function TumaworksApp() {
                👨‍🔧
              </div>
              <div className="space-y-2">
-                <h1 className="text-4xl font-black text-white tracking-tighter leading-none">John Mwangi</h1>
-                <p className="text-white/60 font-black uppercase text-xs tracking-[0.3em]">Master Plumber</p>
+                <h1 className="text-4xl font-bold text-white tracking-tighter leading-none">John Mwangi</h1>
+                <p className="text-white/60 font-bold  text-xs tracking-[0.3em]">Master Plumber</p>
                 <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-accent/30 w-max mt-4">
                   <ShieldCheck className="w-4 h-4 text-accent" />
-                  <span className="text-[10px] font-black text-accent uppercase tracking-widest">Verified Pro</span>
+                  <span className="text-[10px] font-bold text-accent  tracking-widest">Verified Pro</span>
                 </div>
              </div>
           </div>
@@ -706,42 +706,42 @@ export default function TumaworksApp() {
       <div className="px-8 -mt-12 space-y-12 relative z-20 pb-10">
          <div className="grid grid-cols-2 gap-6">
             <div className={glassCard + " bg-white/90 !p-6 flex flex-col items-center text-center shadow-lg border-white"}>
-               <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Experience</span>
-               <p className="text-3xl font-black text-foreground tracking-tighter">5+ Years</p>
+               <span className="text-[10px] font-bold  tracking-widest text-neutral-400 mb-2">Experience</span>
+               <p className="text-3xl font-bold text-foreground tracking-tighter">5+ Years</p>
             </div>
             <div className={glassCard + " bg-white/90 !p-6 flex flex-col items-center text-center shadow-lg border-white"}>
-               <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Success rate</span>
+               <span className="text-[10px] font-bold  tracking-widest text-neutral-400 mb-2">Success rate</span>
                <div className="flex items-center gap-2">
                  <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                 <p className="text-3xl font-black text-foreground tracking-tighter">4.9</p>
+                 <p className="text-3xl font-bold text-foreground tracking-tighter">4.9</p>
                </div>
             </div>
          </div>
          
          <div className="animate-slideUp" style={{animationDelay: '0.1s'}}>
-            <h3 className="text-2xl font-black text-foreground tracking-tight mb-4">Skills & Experience</h3>
+            <h3 className="text-2xl font-bold text-foreground tracking-tight mb-4">Skills & Experience</h3>
             <p className="text-neutral-500 font-bold leading-relaxed tracking-tight text-lg mb-8">Professional plumber specializing in high-quality piping, leak repair, and luxury bathroom installations.</p>
             <div className="flex flex-wrap gap-4">
               {['Plumbing', 'Fast Service', 'Big Projects', 'Cleaning'].map((s, i) => (
-                <span key={i} className="bg-neutral-900 text-white px-6 py-3 rounded-[24px] text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-neutral-900/10 transition-transform hover:scale-105">{s}</span>
+                <span key={i} className="bg-neutral-900 text-white px-6 py-3 rounded-[24px] text-[10px] font-bold  tracking-[0.2em] shadow-lg shadow-neutral-900/10 transition-transform hover:scale-105">{s}</span>
               ))}
             </div>
          </div>
 
          <div className="animate-slideUp" style={{animationDelay: '0.2s'}}>
-            <h3 className="text-2xl font-black text-foreground tracking-tight mb-6">Past Jobs</h3>
+            <h3 className="text-2xl font-bold text-foreground tracking-tight mb-6">Past Jobs</h3>
             <div className="bg-white p-8 rounded-[40px] border border-neutral-100 flex items-center gap-6 mb-4 group cursor-pointer hover:shadow-2xl transition-all duration-500">
                <div className="w-16 h-16 bg-primary/5 rounded-[24px] flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-500"><Wrench className="w-8 h-8"/></div>
                <div className="flex-1">
-                  <h4 className="font-black text-xl tracking-tight leading-none group-hover:text-primary transition-colors">Industrial Sink Overhaul</h4>
-                  <p className="text-sm font-bold text-neutral-400 uppercase tracking-widest mt-2">2 days ago · Lusaka South</p>
+                  <h4 className="font-bold text-xl tracking-tight leading-none group-hover:text-primary transition-colors">Industrial Sink Overhaul</h4>
+                  <p className="text-sm font-bold text-neutral-400  tracking-widest mt-2">2 days ago · Lusaka South</p>
                </div>
                <div className="w-12 h-12 bg-neutral-50 rounded-full flex items-center justify-center group-hover:translate-x-2 transition-transform"><ChevronRight className="w-6 h-6 text-neutral-300"/></div>
             </div>
          </div>
 
          <div className="pt-10">
-            <button onClick={() => navigate('chat-detail')} className={`w-full py-6 bg-primary text-white font-black rounded-[32px] text-xs uppercase tracking-[0.4em] shadow-2xl shadow-primary/30 hover:shadow-primary/40 active:scale-95 transition-all flex items-center justify-center gap-4`}>
+            <button onClick={() => navigate('chat-detail')} className={`w-full py-6 bg-primary text-white font-bold rounded-[32px] text-xs  tracking-[0.4em] shadow-2xl shadow-primary/30 hover:shadow-primary/40 active:scale-95 transition-all flex items-center justify-center gap-4`}>
                Hire Pro <ArrowRight className="w-5 h-5"/>
             </button>
          </div>
@@ -754,8 +754,8 @@ export default function TumaworksApp() {
   const ChatListScreen = () => (
     <div className="min-h-screen bg-neutral-50/50 pb-28 page-transition">
       <div className="bg-white/80 backdrop-blur-2xl px-8 pt-12 pb-8 sticky top-0 z-40 border-b border-neutral-100 flex-shrink-0">
-          <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase whitespace-nowrap">Messages</h1>
-          <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] mt-2">Your Conversations</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tighter  whitespace-nowrap">Messages</h1>
+          <p className="text-[10px] font-bold  text-primary tracking-[0.3em] mt-2">Your Conversations</p>
       </div>
 
       <div className="divide-y divide-neutral-100 px-4 mt-6">
@@ -767,12 +767,12 @@ export default function TumaworksApp() {
               <div className="w-20 h-20 bg-neutral-100 rounded-[28px] flex items-center justify-center text-4xl flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-inner">{c.img}</div>
               <div className="flex-1 min-w-0 space-y-2">
                  <div className="flex justify-between items-baseline">
-                    <h3 className="font-black text-xl tracking-tight text-foreground">{c.n}</h3>
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${c.unread ? 'text-primary' : 'text-neutral-300'}`}>{c.t}</span>
+                    <h3 className="font-bold text-xl tracking-tight text-foreground">{c.n}</h3>
+                    <span className={`text-[10px] font-bold  tracking-widest ${c.unread ? 'text-primary' : 'text-neutral-300'}`}>{c.t}</span>
                  </div>
                  <div className="flex justify-between items-center pr-2">
                     <p className={`text-sm truncate font-bold tracking-tight ${c.unread ? 'text-foreground' : 'text-neutral-400'}`}>{c.m}</p>
-                    {c.unread > 0 && <span className="bg-primary text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center animate-bounce-slow shadow-lg shadow-primary/30">{c.unread}</span>}
+                    {c.unread > 0 && <span className="bg-primary text-white text-[10px] font-bold w-6 h-6 rounded-full flex items-center justify-center animate-bounce-slow shadow-lg shadow-primary/30">{c.unread}</span>}
                  </div>
               </div>
            </button>
@@ -790,10 +790,10 @@ export default function TumaworksApp() {
           <button onClick={() => navigate('chat-list')} className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-90"><ArrowLeft className="w-6 h-6" /></button>
           <div className="w-14 h-14 bg-neutral-100 rounded-[20px] shadow-inner flex items-center justify-center text-3xl">👨‍🔧</div>
           <div className="space-y-1">
-             <h2 className="font-black text-xl tracking-tighter text-foreground leading-none">John Mwangi</h2>
+             <h2 className="font-bold text-xl tracking-tighter text-foreground leading-none">John Mwangi</h2>
              <div className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <p className="text-[10px] text-neutral-400 font-black uppercase tracking-widest">Online</p>
+                <p className="text-[10px] text-neutral-400 font-bold  tracking-widest">Online</p>
              </div>
           </div>
         </div>
@@ -805,15 +805,15 @@ export default function TumaworksApp() {
       <div className="flex-1 overflow-auto p-8 space-y-8 mt-4">
          <div className="bg-white rounded-[32px] rounded-tl-none p-6 max-w-[85%] shadow-[0_15px_30px_rgba(0,0,0,0.03)] border border-neutral-50 animate-slideUp">
            <p className="font-bold text-neutral-800 leading-relaxed tracking-tight">Hi! I saw your plumbing request. I can fix it today.</p>
-           <span className="text-[10px] text-neutral-300 font-black uppercase tracking-widest block mt-4 text-right">10:40 AM</span>
+           <span className="text-[10px] text-neutral-300 font-bold  tracking-widest block mt-4 text-right">10:40 AM</span>
          </div>
          <div className="bg-primary text-white rounded-[32px] rounded-tr-none p-6 max-w-[85%] shadow-2xl shadow-primary/20 ml-auto animate-slideUp" style={{animationDelay: '0.1s'}}>
-           <p className="font-black leading-relaxed tracking-tight">Great! Are you okay with the ZMW 1500 budget?</p>
-           <span className="text-[10px] text-white/50 font-black uppercase tracking-widest block mt-4 text-right">10:41 AM</span>
+           <p className="font-bold leading-relaxed tracking-tight">Great! Are you okay with the ZMW 1500 budget?</p>
+           <span className="text-[10px] text-white/50 font-bold  tracking-widest block mt-4 text-right">10:41 AM</span>
          </div>
          <div className="bg-white rounded-[32px] rounded-tl-none p-6 max-w-[85%] shadow-[0_15px_30px_rgba(0,0,0,0.03)] border border-neutral-50 animate-slideUp" style={{animationDelay: '0.2s'}}>
            <p className="font-bold text-neutral-800 leading-relaxed tracking-tight">I am on my way!</p>
-           <span className="text-[10px] text-neutral-300 font-black uppercase tracking-widest block mt-4 text-right">10:42 AM</span>
+           <span className="text-[10px] text-neutral-300 font-bold  tracking-widest block mt-4 text-right">10:42 AM</span>
          </div>
       </div>
 
@@ -821,7 +821,7 @@ export default function TumaworksApp() {
         <div className="flex gap-4">
           <button className="w-14 h-14 bg-neutral-100 rounded-2xl flex items-center justify-center text-neutral-400 hover:text-primary transition-all active:scale-90"><Plus className="w-6 h-6"/></button>
           <div className="flex-1 relative group">
-             <input type="text" placeholder="COMMAND INPUT..." className="w-full h-14 bg-neutral-100 rounded-3xl px-6 focus:outline-none focus:ring-4 focus:ring-primary/5 font-black text-[10px] uppercase tracking-widest placeholder:text-neutral-300" />
+             <input type="text" placeholder="COMMAND INPUT..." className="w-full h-14 bg-neutral-100 rounded-3xl px-6 focus:outline-none focus:ring-4 focus:ring-primary/5 font-bold text-[10px]  tracking-widest placeholder:text-neutral-300" />
              <button className="absolute right-2 top-2 w-10 h-10 bg-primary text-white rounded-[18px] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
                 <ArrowRight className="w-5 h-5" />
              </button>
@@ -842,11 +842,11 @@ export default function TumaworksApp() {
                <Camera className="w-10 h-10 text-white"/>
             </div>
          </div>
-         <h1 className="text-3xl font-black mt-8 text-foreground tracking-tighter uppercase leading-none">{user?.name || 'TumaWorks User'}</h1>
-         <p className="text-neutral-400 font-bold mt-2 text-sm uppercase tracking-widest">Active Member</p>
+         <h1 className="text-3xl font-bold mt-8 text-foreground tracking-tighter  leading-none">{user?.name || 'TumaWorks User'}</h1>
+         <p className="text-neutral-400 font-bold mt-2 text-sm  tracking-widest">Active Member</p>
          <div className="mt-8 flex gap-4 justify-center">
-            <button className="bg-neutral-900 text-white font-black px-8 py-4 rounded-[24px] text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-xl active:scale-95">Edit</button>
-            <button onClick={() => { AuthService.logout(); }} className="bg-red-50 text-red-600 font-black px-8 py-4 rounded-[24px] text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95">Exit</button>
+            <button className="bg-neutral-900 text-white font-bold px-8 py-4 rounded-[24px] text-[10px]  tracking-widest hover:bg-primary transition-all shadow-xl active:scale-95">Edit</button>
+            <button onClick={() => { AuthService.logout(); }} className="bg-red-50 text-red-600 font-bold px-8 py-4 rounded-[24px] text-[10px]  tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95">Exit</button>
          </div>
       </div>
 
@@ -856,17 +856,17 @@ export default function TumaworksApp() {
             <div className="absolute top-[-20%] right-[-10%] w-40 h-40 bg-white/20 rounded-full blur-3xl animate-pulse"></div>
             <div className="relative z-10">
                <div className="flex justify-between items-center mb-6">
-                  <h3 className="font-black text-xs uppercase tracking-[0.3em] flex items-center gap-3"><Gem className="w-5 h-5"/> My Points</h3>
-                  <span className="text-4xl font-black tracking-tighter">{diamonds}</span>
+                  <h3 className="font-bold text-xs  tracking-[0.3em] flex items-center gap-3"><Gem className="w-5 h-5"/> My Points</h3>
+                  <span className="text-4xl font-bold tracking-tighter">{diamonds}</span>
                </div>
                <p className="text-xs font-bold text-white/70 tracking-tight leading-relaxed mb-10">Your earned points from successfully completed work.</p>
-               <button className="w-full py-4 bg-white/20 backdrop-blur-xl border border-white/30 text-white font-black rounded-3xl text-[10px] uppercase tracking-widest hover:bg-white/30 transition-all">Refresh Points</button>
+               <button className="w-full py-4 bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold rounded-3xl text-[10px]  tracking-widest hover:bg-white/30 transition-all">Refresh Points</button>
             </div>
          </div>
 
          {/* Settings */}
          <div className="space-y-6">
-            <h3 className="text-[10px] font-black text-neutral-300 uppercase tracking-[0.4em] ml-2">My Settings</h3>
+            <h3 className="text-[10px] font-bold text-neutral-300  tracking-[0.4em] ml-2">My Settings</h3>
             <div className="grid grid-cols-1 gap-4">
                {[
                  { i: Briefcase, l: 'My Skills' },
@@ -877,7 +877,7 @@ export default function TumaworksApp() {
                  <button key={i} className="w-full flex items-center justify-between p-8 bg-white rounded-[40px] border border-neutral-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group">
                    <div className="flex items-center gap-6">
                      <div className="w-14 h-14 bg-neutral-50 rounded-[20px] flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner"><item.i className="w-6 h-6 text-neutral-400 group-hover:text-white transition-colors"/></div>
-                     <span className="font-black text-xl tracking-tight text-foreground group-hover:text-primary transition-colors">{item.l}</span>
+                     <span className="font-bold text-xl tracking-tight text-foreground group-hover:text-primary transition-colors">{item.l}</span>
                    </div>
                    <div className="w-10 h-10 bg-neutral-50 rounded-full flex items-center justify-center group-hover:translate-x-2 transition-transform duration-500"><ChevronRight className="w-5 h-5 text-neutral-300" /></div>
                  </button>
@@ -889,15 +889,15 @@ export default function TumaworksApp() {
              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
              <div className="flex items-center gap-4 mb-6">
                 <TrendingUp className="w-6 h-6 text-primary" />
-                <h3 className="text-2xl font-black text-foreground tracking-tighter uppercase leading-none">User Mode</h3>
+                <h3 className="text-2xl font-bold text-foreground tracking-tighter  leading-none">User Mode</h3>
              </div>
-             <p className="text-sm text-neutral-400 mb-10 font-bold leading-relaxed tracking-tight">You are currently a <span className="text-primary uppercase tracking-[0.1em] font-black">{role}</span>. Switch modes to see the other side of the app.</p>
-             <button onClick={toggleRole} className="w-full py-6 bg-white border-[3px] border-primary text-primary font-black rounded-[32px] hover:bg-primary hover:text-white transition-all duration-700 transform active:scale-95 shadow-2xl shadow-primary/10 text-xs uppercase tracking-[0.3em]">
+             <p className="text-sm text-neutral-400 mb-10 font-bold leading-relaxed tracking-tight">You are currently a <span className="text-primary  tracking-[0.1em] font-bold">{role}</span>. Switch modes to see the other side of the app.</p>
+             <button onClick={toggleRole} className="w-full py-6 bg-white border-[3px] border-primary text-primary font-bold rounded-[32px] hover:bg-primary hover:text-white transition-all duration-700 transform active:scale-95 shadow-2xl shadow-primary/10 text-xs  tracking-[0.3em]">
                 Switch to {role === 'client' ? 'Worker' : 'Client'} Mode
              </button>
           </div>
 
-          <button onClick={() => { AuthService.logout(); navigate('onboarding'); }} className="w-full py-6 text-red-500 font-black bg-red-50 rounded-[32px] text-xs uppercase tracking-[0.4em] hover:bg-red-500 hover:text-white transition-all duration-500 active:scale-95 mb-10">Logout</button>
+          <button onClick={() => { AuthService.logout(); navigate('onboarding'); }} className="w-full py-6 text-red-500 font-bold bg-red-50 rounded-[32px] text-xs  tracking-[0.4em] hover:bg-red-500 hover:text-white transition-all duration-500 active:scale-95 mb-10">Logout</button>
       </div>
     </div>
   );
@@ -928,7 +928,7 @@ export default function TumaworksApp() {
        <div className="min-h-screen bg-neutral-50/50 pb-28 page-transition">
           {/* Elite Header */}
           <div className="bg-white/80 backdrop-blur-xl p-8 sticky top-0 z-40 border-b border-neutral-100/50 flex items-center justify-between">
-             <h1 className="text-3xl font-black text-foreground tracking-tighter">Marketplace</h1>
+             <h1 className="text-3xl font-bold text-foreground tracking-tighter">Marketplace</h1>
              <button className="bg-primary text-white p-4 rounded-3xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
                 <Plus className="w-6 h-6" />
              </button>
@@ -949,7 +949,7 @@ export default function TumaworksApp() {
              {/* Categories */}
              <div className="flex gap-4 overflow-x-auto pb-4 -mx-8 px-8 no-scrollbar">
                 {['All Items', 'Farming', 'Tech', 'Tools', 'Vehicles', 'Seeds'].map((c, i) => (
-                   <button key={i} className={`flex-none px-8 py-4 rounded-[30px] font-black text-xs uppercase tracking-widest transition-all duration-500 ${i === 0 ? 'bg-primary text-white shadow-2xl shadow-primary/30 scale-105' : 'bg-white border border-neutral-100 text-neutral-400 hover:border-primary/20 hover:text-primary shadow-sm'}`}>{c}</button>
+                   <button key={i} className={`flex-none px-8 py-4 rounded-[30px] font-bold text-xs  tracking-widest transition-all duration-500 ${i === 0 ? 'bg-primary text-white shadow-2xl shadow-primary/30 scale-105' : 'bg-white border border-neutral-100 text-neutral-400 hover:border-primary/20 hover:text-primary shadow-sm'}`}>{c}</button>
                 ))}
              </div>
 
@@ -959,16 +959,16 @@ export default function TumaworksApp() {
                    <div key={item.id} className="bg-white rounded-[50px] overflow-hidden border border-neutral-100 shadow-sm hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 group cursor-pointer relative">
                       <div className="h-80 relative overflow-hidden">
                          <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                         <div className="absolute top-8 right-8 bg-neutral-900 text-white px-6 py-3 rounded-[30px] shadow-2xl border border-white/10 font-black text-lg">
+                         <div className="absolute top-8 right-8 bg-neutral-900 text-white px-6 py-3 rounded-[30px] shadow-2xl border border-white/10 font-bold text-lg">
                             ZMW {item.price.toLocaleString()}
                          </div>
-                         <div className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-md text-primary px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-xl">
+                         <div className="absolute bottom-8 left-8 bg-white/90 backdrop-blur-md text-primary px-6 py-2 rounded-full text-[10px] font-bold  tracking-[0.2em] shadow-xl">
                             {item.category}
                          </div>
                       </div>
                       <div className="p-10">
                          <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-2xl font-black text-foreground leading-none tracking-tight group-hover:text-primary transition-colors">{item.title}</h3>
+                            <h3 className="text-2xl font-bold text-foreground leading-none tracking-tight group-hover:text-primary transition-colors">{item.title}</h3>
                             <button className="w-12 h-12 bg-neutral-50 rounded-2xl flex items-center justify-center text-neutral-300 hover:bg-red-50 hover:text-red-500 transition-all"><Heart className="w-6 h-6" /></button>
                          </div>
                          <p className="text-neutral-400 font-bold text-sm mb-10 line-clamp-2 leading-relaxed tracking-tight">{item.desc}</p>
@@ -977,9 +977,9 @@ export default function TumaworksApp() {
                                <div className="w-8 h-8 bg-neutral-100 rounded-full flex items-center justify-center">
                                   <MapPin className="w-4 h-4 text-neutral-400" />
                                </div>
-                               <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">{item.location}</span>
+                               <span className="text-[10px] font-bold text-neutral-400  tracking-widest">{item.location}</span>
                             </div>
-                            <span className="text-[10px] font-black text-neutral-300 uppercase tracking-widest">{item.time}</span>
+                            <span className="text-[10px] font-bold text-neutral-300  tracking-widest">{item.time}</span>
                          </div>
                       </div>
                    </div>
@@ -1021,15 +1021,15 @@ export default function TumaworksApp() {
             </div>
 
             <div className="space-y-4">
-               <h2 className="text-3xl font-black text-foreground tracking-tighter uppercase">{steps[tutorialStep].t}</h2>
+               <h2 className="text-3xl font-bold text-foreground tracking-tighter ">{steps[tutorialStep].t}</h2>
                <p className="text-neutral-500 font-bold leading-relaxed">{steps[tutorialStep].d}</p>
             </div>
 
             <div className="pt-8">
                {tutorialStep < steps.length - 1 ? (
-                 <button onClick={() => setTutorialStep(tutorialStep + 1)} className="w-full py-6 bg-primary text-white font-black rounded-3xl text-xs uppercase tracking-widest shadow-xl active:scale-95">Next Step</button>
+                 <button onClick={() => setTutorialStep(tutorialStep + 1)} className="w-full py-6 bg-primary text-white font-bold rounded-3xl text-xs  tracking-widest shadow-xl active:scale-95">Next Step</button>
                ) : (
-                 <button onClick={() => setShowTutorial(false)} className="w-full py-6 bg-neutral-900 text-white font-black rounded-3xl text-xs uppercase tracking-widest shadow-xl active:scale-95">Get Started</button>
+                 <button onClick={() => setShowTutorial(false)} className="w-full py-6 bg-neutral-900 text-white font-bold rounded-3xl text-xs  tracking-widest shadow-xl active:scale-95">Get Started</button>
                )}
             </div>
          </div>
@@ -1073,8 +1073,8 @@ export default function TumaworksApp() {
                 <Zap className="w-10 h-10 text-primary fill-primary/20" />
              </div>
              <div className="relative z-10">
-                <h2 className="font-black text-2xl text-white tracking-widest uppercase mb-2">Tumaworks</h2>
-                <p className="font-bold text-primary tracking-[0.3em] uppercase text-[10px] animate-pulse">Matching you with nearby help...</p>
+                <h2 className="font-bold text-2xl text-white tracking-widest  mb-2">Tumaworks</h2>
+                <p className="font-bold text-primary tracking-[0.3em]  text-[10px] animate-pulse">Matching you with nearby help...</p>
              </div>
           </div>
         ) : (
@@ -1105,7 +1105,7 @@ export default function TumaworksApp() {
                        <div className={`absolute inset-0 bg-primary/10 rounded-full scale-0 transition-transform duration-300 ${isActive ? 'scale-150' : 'group-hover:scale-100'}`}></div>
                        <item.icon className={`w-6 h-6 relative z-10 transition-colors duration-300 ${isActive ? 'text-primary' : 'text-neutral-400 group-hover:text-primary'}`} />
                     </div>
-                    <span className={`text-[10px] uppercase tracking-wider font-extrabold transition-all duration-300 ${isActive ? 'text-primary translate-y-0 opacity-100' : 'text-neutral-400 translate-y-1 group-hover:text-primary'}`}>{item.label}</span>
+                    <span className={`text-[10px]  tracking-wider font-semibold transition-all duration-300 ${isActive ? 'text-primary translate-y-0 opacity-100' : 'text-neutral-400 translate-y-1 group-hover:text-primary'}`}>{item.label}</span>
                   </button>
                 );
               })}
