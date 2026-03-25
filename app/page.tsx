@@ -46,21 +46,32 @@ export default function TumaworksApp() {
   useEffect(() => {
     const unsub = AuthService.onAuthStateChange(async (firebaseUser) => {
        if (firebaseUser) {
-          let profile = await DBService.getUserProfile(firebaseUser.uid);
-          
-          // Self-healing: Create profile if missing
-          if (!profile) {
-            await DBService.createUserProfile(firebaseUser.uid, {
-               name: firebaseUser.displayName || 'Anonymous User',
-               email: firebaseUser.email || '',
-               role: 'client'
-            });
-            profile = await DBService.getUserProfile(firebaseUser.uid);
-          }
+          try {
+            let profile = await DBService.getUserProfile(firebaseUser.uid);
+            
+            // Self-healing: Create profile if missing
+            if (!profile) {
+              await DBService.createUserProfile(firebaseUser.uid, {
+                 name: firebaseUser.displayName || 'Anonymous User',
+                 email: firebaseUser.email || '',
+                 role: 'client'
+              });
+              profile = await DBService.getUserProfile(firebaseUser.uid);
+            }
 
-          setUser(profile);
-          if (profile) setRole(profile.role);
-          setCurrentScreen('dashboard');
+            setUser(profile);
+            if (profile) setRole(profile.role);
+            setCurrentScreen('dashboard');
+          } catch (profileErr: any) {
+            console.error("Profile sync error:", profileErr);
+            // If we can't get the profile due to rules, we still show the dashboard but with limited functionality
+            // Or we stay on the current screen and show a useful error
+            if (profileErr.message?.toLowerCase().includes('permission')) {
+               // This is likely the "Firestore Rules not published" issue
+               // We'll set a global error that screens can display
+               (window as any).__last_auth_error = "CRITICAL: Firestore Security Rules NOT published. Please check Firebase Console.";
+            }
+          }
        } else {
           setUser(null);
           setCurrentScreen('onboarding');
@@ -149,7 +160,13 @@ export default function TumaworksApp() {
          await AuthService.login(email, password); 
        } 
        catch (err: any) { 
-         setError(err.message || 'Login failed. Please check your details.');
+         let msg = err.message || 'Login failed. Please check your details.';
+         if (msg.includes('invalid-credential')) {
+           msg = 'WRONG EMAIL OR PASSWORD. PLEASE TRY AGAIN.';
+         } else if (msg.includes('permission')) {
+           msg = 'FIREBASE PERMISSION ERROR: Firestore Rules are NOT published.';
+         }
+         setError(msg);
        } 
        finally { setAuthLoading(false); }
     };
@@ -205,11 +222,20 @@ export default function TumaworksApp() {
        setError('');
        if (!email || !password || !name) return setError('Please fill in all fields');
        setAuthLoading(true);
-       try { await AuthService.signup(email, password, name, userRole); } 
+       try { 
+         await AuthService.signup(email, password, name, userRole); 
+         // If we get here, the user is signed up and auth'd.
+         // Even if profile creation fails, let the onAuthStateChange handle it.
+         setCurrentScreen('dashboard');
+       } 
        catch (err: any) { 
          let msg = err.message || 'Signup failed. Please try again.';
          if (msg.includes('api-key-not-valid')) {
            msg = 'Firebase API Key is invalid or missing. Please check your Vercel Environment Variables.';
+         } else if (msg.includes('permission')) {
+           msg = 'UNABLE TO SAVE PROFILE: Firestore Rules are NOT published. Please go to Firebase Console and publish your rules.';
+         } else if (msg.includes('invalid-credential')) {
+           msg = 'Password is too weak or email is invalid.';
          }
          setError(msg);
        } 
