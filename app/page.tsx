@@ -43,6 +43,8 @@ export default function TumaworksApp() {
   const [budget, setBudget] = useState(1500);
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editName, setEditName] = useState('');
 
   // Load persistence logic
   useEffect(() => {
@@ -833,22 +835,57 @@ export default function TumaworksApp() {
 
   // PROFILE / SETTINGS (DASHBOARD FOR OWNER)
   // BOLD PREMIUM PROFILE DASHBOARD
-  const ProfileDashboardScreen = () => (
-    <div className="min-h-screen bg-neutral-50/50 pb-32 pt-12 page-transition">
-      <div className="px-10 mb-12 text-center relative group">
-         <div className="w-32 h-32 mx-auto bg-white rounded-[40px] shadow-2xl flex items-center justify-center text-6xl relative overflow-hidden transition-transform duration-700 group-hover:scale-110 group-hover:rotate-3 border-[6px] border-white">
-            <span className="z-0 animate-float">Boy</span>
-            <div className="absolute inset-0 bg-neutral-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all cursor-pointer">
-               <Camera className="w-10 h-10 text-white"/>
-            </div>
-         </div>
-         <h1 className="text-3xl font-bold mt-8 text-foreground tracking-tighter  leading-none">{user?.name || 'TumaWorks User'}</h1>
-         <p className="text-neutral-400 font-bold mt-2 text-sm  tracking-widest">Active Member</p>
-         <div className="mt-8 flex gap-4 justify-center">
-            <button className="bg-neutral-900 text-white font-bold px-8 py-4 rounded-[24px] text-[10px]  tracking-widest hover:bg-primary transition-all shadow-xl active:scale-95">Edit</button>
-            <button onClick={() => { AuthService.logout(); }} className="bg-red-50 text-red-600 font-bold px-8 py-4 rounded-[24px] text-[10px]  tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95">Exit</button>
-         </div>
-      </div>
+  const ProfileDashboardScreen = () => {
+    const handleSaveProfile = async () => {
+       if (!user) return;
+       setLoading(true);
+       try {
+          await DBService.createUserProfile(user.id, { name: editName || user.name });
+          const updated = await DBService.getUserProfile(user.id);
+          setUser(updated);
+          setIsEditingProfile(false);
+       } catch (err) {
+          alert("Error saving profile");
+       } finally {
+          setLoading(false);
+       }
+    };
+
+    return (
+      <div className="min-h-screen bg-neutral-50/50 pb-32 pt-12 page-transition">
+        <div className="px-10 mb-12 text-center relative group">
+           <div className="w-32 h-32 mx-auto bg-white rounded-[40px] shadow-2xl flex items-center justify-center text-6xl relative overflow-hidden transition-transform duration-700 group-hover:scale-110 group-hover:rotate-3 border-[6px] border-white">
+              <span className="z-0 animate-float">👤</span>
+              <div className="absolute inset-0 bg-neutral-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all cursor-pointer">
+                 <Camera className="w-10 h-10 text-white"/>
+              </div>
+           </div>
+           
+           {isEditingProfile ? (
+              <div className="mt-8 space-y-4 animate-slideUp">
+                 <input 
+                    type="text" 
+                    value={editName} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="w-full bg-white border border-neutral-200 rounded-2xl py-4 px-6 text-center font-bold text-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
+                 />
+                 <div className="flex gap-4">
+                    <button onClick={handleSaveProfile} className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl text-xs tracking-widest hover:shadow-xl active:scale-95 transition-all">Save Changes</button>
+                    <button onClick={() => setIsEditingProfile(false)} className="flex-1 bg-neutral-100 text-neutral-400 font-bold py-4 rounded-2xl text-xs tracking-widest active:scale-95">Cancel</button>
+                 </div>
+              </div>
+           ) : (
+              <div className="animate-slideUp">
+                 <h1 className="text-3xl font-bold mt-8 text-foreground tracking-tighter leading-none">{user?.name || 'TumaWorks User'}</h1>
+                 <p className="text-neutral-400 font-bold mt-2 text-sm tracking-widest">Active Member</p>
+                 <div className="mt-8 flex gap-4 justify-center">
+                    <button onClick={() => { setEditName(user?.name || ''); setIsEditingProfile(true); }} className="bg-neutral-900 text-white font-bold px-8 py-4 rounded-[24px] text-[10px] tracking-widest hover:bg-primary transition-all shadow-xl active:scale-95">Edit Profile</button>
+                    <button onClick={() => { AuthService.logout(); }} className="bg-red-50 text-red-600 font-bold px-8 py-4 rounded-[24px] text-[10px] tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95">Exit</button>
+                 </div>
+              </div>
+           )}
+        </div>
 
       <div className="px-8 space-y-12">
          {/* Rewards */}
@@ -869,12 +906,12 @@ export default function TumaworksApp() {
             <h3 className="text-[10px] font-bold text-neutral-300  tracking-[0.4em] ml-2">My Settings</h3>
             <div className="grid grid-cols-1 gap-4">
                {[
-                 { i: Briefcase, l: 'My Skills' },
-                 { i: CheckCircle, l: 'Job History' },
-                 { i: Grid, l: 'Marketplace' },
-                 { i: Settings, l: 'App Settings' },
+                 { i: Briefcase, l: 'My Skills', s: 'dashboard' },
+                 { i: CheckCircle, l: 'Job History', s: 'dashboard' },
+                 { i: Grid, l: 'Marketplace', s: 'marketplace' },
+                 { i: Settings, l: 'App Settings', s: 'settings' },
                ].map((item, i) => (
-                 <button key={i} className="w-full flex items-center justify-between p-8 bg-white rounded-[40px] border border-neutral-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group">
+                 <button key={i} onClick={() => navigate(item.s as Screen)} className="w-full flex items-center justify-between p-8 bg-white rounded-[40px] border border-neutral-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group">
                    <div className="flex items-center gap-6">
                      <div className="w-14 h-14 bg-neutral-50 rounded-[20px] flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner"><item.i className="w-6 h-6 text-neutral-400 group-hover:text-white transition-colors"/></div>
                      <span className="font-bold text-xl tracking-tight text-foreground group-hover:text-primary transition-colors">{item.l}</span>
@@ -901,6 +938,45 @@ export default function TumaworksApp() {
       </div>
     </div>
   );
+};
+ 
+  // SETTINGS SCREEN
+  const SettingsScreen = () => {
+    const [notifs, setNotifs] = useState(true);
+    const [darkMode, setDarkMode] = useState(false);
+    return (
+      <div className="min-h-screen bg-neutral-50/50 pb-28 page-transition">
+         <div className="bg-white/80 backdrop-blur-xl p-8 sticky top-0 z-40 border-b border-neutral-100/50 flex items-center gap-6">
+            <button onClick={() => navigate('profile-dashboard')} className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-95">
+               <ArrowLeft className="w-6 h-6" />
+            </button>
+            <h1 className="text-3xl font-bold text-foreground tracking-tighter">Settings</h1>
+         </div>
+
+         <div className="p-8 space-y-10">
+            <div className="space-y-6">
+               <h3 className="text-[10px] font-bold text-neutral-300  tracking-[0.4em] ml-2">App Preferences</h3>
+               <div className="space-y-4">
+                  {[
+                    { l: 'Push Notifications', active: notifs, toggle: () => setNotifs(!notifs), icon: Bell },
+                    { l: 'Dark Mode (Beta)', active: darkMode, toggle: () => setDarkMode(!darkMode), icon: Eye },
+                  ].map((s, i) => (
+                    <div key={i} className="flex items-center justify-between p-8 bg-white rounded-[40px] border border-neutral-100 shadow-sm">
+                       <div className="flex items-center gap-6">
+                          <div className="w-12 h-12 bg-neutral-50 rounded-2xl flex items-center justify-center text-neutral-400 group-hover:bg-primary group-hover:text-white transition-all"><s.icon className="w-5 h-5" /></div>
+                          <span className="font-bold text-xl tracking-tight text-foreground">{s.l}</span>
+                       </div>
+                       <button onClick={s.toggle} className={`w-14 h-8 rounded-full transition-all duration-500 relative ${s.active ? 'bg-primary' : 'bg-neutral-200'}`}>
+                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-500 ${s.active ? 'left-7' : 'left-1'}`}></div>
+                       </button>
+                    </div>
+                  ))}
+               </div>
+            </div>
+         </div>
+      </div>
+    );
+  };
 
   // NOTIFICATION & OTHERS placeholders
   const NotificationsScreen = () => <div className="p-6"><button onClick={()=>navigate('dashboard')} className="text-primary font-bold">Back</button><h1 className="text-2xl font-bold mt-4">Notifications</h1><p className="mt-4">No new notifications.</p></div>;
@@ -1050,7 +1126,7 @@ export default function TumaworksApp() {
     'chat-detail': ChatDetailScreen,
     notifications: NotificationsScreen,
     'profile-dashboard': ProfileDashboardScreen,
-    settings: ProfileDashboardScreen,
+    settings: SettingsScreen,
     subscription: SubscriptionScreen,
     marketplace: MarketplaceScreen,
     'browse-services': BrowseServicesScreen
@@ -1092,7 +1168,7 @@ export default function TumaworksApp() {
                 { icon: Grid, label: 'Browse', s: 'browse-services' },
                 { icon: ShoppingBag, label: 'Market', s: 'marketplace' },
                 { icon: MessageCircle, label: 'Chat', s: 'chat-list' },
-                { icon: Settings, label: 'Profile', s: 'profile-dashboard' },
+                { icon: User, label: 'Profile', s: 'profile-dashboard' },
               ].map((item, i) => {
                 const isActive = currentScreen === item.s;
                 return (
