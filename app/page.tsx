@@ -1329,7 +1329,7 @@ export default function TumaworksApp() {
       </div>
     </div>
   );
-};
+  };
  
   // SETTINGS SCREEN
   const SettingsScreen = () => {
