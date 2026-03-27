@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Tumaworks",
+    "slug": "v0-tumaworks-mobile-app-design",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.seantinashenyakutira.tumaworks"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.seantinashenyakutira.tumaworks"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "firebaseApiKey": "PASTE_YOUR_FIREBASE_API_KEY_HERE",
+      "firebaseAuthDomain": "tumaworks-mobile.firebaseapp.com",
+      "firebaseProjectId": "tumaworks-mobile",
+      "firebaseStorageBucket": "tumaworks-mobile.appspot.com",
+      "firebaseMessagingSenderId": "1234567890",
+      "firebaseAppId": "1:123456789:android:abcdef",
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID_IF_ANY"
+      }
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}

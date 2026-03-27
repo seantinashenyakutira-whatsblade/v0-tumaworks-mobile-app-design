@@ -27,14 +27,26 @@ export class DBService {
   }
 
   static async createUserProfile(userId: string, profile: Partial<UserProfile>) {
-    await setDoc(doc(db, 'users', userId), {
-      ...profile,
-      id: userId,
-      createdAt: serverTimestamp(),
-      walletBalance: 0,
-      rating: 5.0,
-      reviewsCount: 0,
-    }, { merge: true });
+    // Use updateDoc instead of setDoc to prevent overwriting existing financial data
+    // If it's a true creation, we do setDoc. We'll check if exists first.
+    const userRef = doc(db, 'users', userId);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) {
+      await setDoc(userRef, {
+        ...profile,
+        id: userId,
+        createdAt: serverTimestamp(),
+        walletBalance: 0,
+        escrowBalance: 0,
+        pendingEarnings: 0,
+        rating: 5.0,
+        reviewsCount: 0,
+      });
+    } else {
+      await updateDoc(userRef, {
+        ...profile
+      });
+    }
   }
 
   // --- TASKS ---
@@ -51,44 +63,36 @@ export class DBService {
 
   static async updateTaskStatus(taskId: string, status: TaskStatus, workerId?: string) {
     const update: any = { status, updatedAt: serverTimestamp() };
-    if (workerId) update.selectedWorkerId = workerId;
+    if (workerId) update.workerId = workerId;
     await updateDoc(doc(db, 'tasks', taskId), update);
   }
 
-  // --- ESCROW & WALLET SYSTEM ---
-  static async payForTask(userId: string, workerId: string, amount: number, taskId: string) {
-    await runTransaction(db, async (transaction) => {
-      const userRef = doc(db, 'users', userId);
-      const workerRef = doc(db, 'users', workerId);
-      const taskRef = doc(db, 'tasks', taskId);
-      
-      const userDoc = await transaction.get(userRef);
-      if (!userDoc.exists()) throw "User not found";
-      
-      const balance = userDoc.data().walletBalance || 0;
-      if (balance < amount) throw "Insufficient balance";
+  static async getJob(taskId: string): Promise<Task | null> {
+    const d = await getDoc(doc(db, 'tasks', taskId));
+    return d.exists() ? (d.data() as Task) : null;
+  }
 
-      // 1. Deduct from client
-      transaction.update(userRef, { walletBalance: increment(-amount) });
-      
-      // 2. Add to worker
-      transaction.update(workerRef, { walletBalance: increment(amount) });
-      
-      // 3. Mark task completed
-      transaction.update(taskRef, { status: 'completed' });
-      
-      // 4. Record transaction
-      const transRef = doc(collection(db, 'transactions'));
-      transaction.set(transRef, {
-        userId,
-        amount,
-        type: 'payment',
-        status: 'success',
-        taskId,
-        createdAt: serverTimestamp()
-      });
+  static async getJobs(): Promise<Task[]> {
+    const q = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Task));
+  }
+
+  static async getWorkers(): Promise<UserProfile[]> {
+    const q = query(collection(db, 'users'), where('role', 'in', ['worker', 'both']));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as UserProfile));
+  }
+
+  static async updateTask(taskId: string, data: Partial<Task>) {
+    await updateDoc(doc(db, 'tasks', taskId), {
+      ...data,
+      updatedAt: serverTimestamp()
     });
   }
+
+  // --- ESCROW & WALLET SYSTEM ---
+  // Use WalletService instead for atomic escrow release
 
   // --- STORAGE / FILE UPLOAD ---
   static async uploadFile(file: File, path: string): Promise<string> {

@@ -1,6 +1,6 @@
 export type UserRole = 'client' | 'worker' | 'both';
-export type TaskStatus = 'open' | 'matched' | 'in_progress' | 'completed' | 'cancelled';
-export type TransactionType = 'deposit' | 'payment' | 'withdrawal' | 'escrow';
+export type TaskStatus = 'open' | 'assigned' | 'in_progress' | 'completed' | 'disputed' | 'cancelled';
+export type TransactionType = 'deposit' | 'payment' | 'withdrawal' | 'escrow' | 'fee';
 
 export interface UserProfile {
   id: string;
@@ -19,7 +19,8 @@ export interface UserProfile {
   };
   isPremium: boolean;
   walletBalance: number;
-  pendingBalance: number; // Added for Escrow
+  escrowBalance: number;
+  pendingEarnings: number;
   createdAt: any; // Firestore Timestamp
 }
 
@@ -33,20 +34,32 @@ export interface ServiceItem {
 
 export interface Task {
   id: string;
-  userId: string; // The client
-  serviceId: string;
+  clientId: string;
+  workerId?: string;
+  serviceId?: string;
   description: string;
-  price: number;
+  budget: number;
+  escrowAmount: number;
   location: {
     lat: number;
     lng: number;
     address: string;
   };
   status: TaskStatus;
-  assignedWorkers: string[]; // List of worker IDs who can see it
-  selectedWorkerId?: string; // The one chosen by the user
+  pendingWorkerId?: string;
+  clientConfirmed?: boolean;
+  workerConfirmed?: boolean;
   createdAt: any;
   updatedAt: any;
+}
+
+export interface Dispute {
+  id: string;
+  jobId: string;
+  reason: string;
+  status: 'open' | 'resolved';
+  resolution?: string;
+  createdAt: any;
 }
 
 export interface Message {

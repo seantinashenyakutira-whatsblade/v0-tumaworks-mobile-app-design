@@ -7,14 +7,15 @@ import {
   ShoppingBag, Wrench, Car, Briefcase, Camera, Grid, List, Tag, Share2, Phone,
   Droplets, Hammer, PenTool, Flame, ArrowLeft, Navigation, Edit3, Image as ImageIcon,
   CheckCircle, PlusCircle, Filter, Baby, ShoppingCart, WashingMachine, TrendingUp, HandCoins, ShieldCheck, Wallet as WalletIcon,
-  User, Wallet, Sliders, Plus, CreditCard, Landmark, Shield, Lock, History, Download, AlertCircle, Check, Gem
+  User, Wallet, Sliders, Plus, CreditCard, Landmark, Shield, Lock, History, Download, AlertCircle, Check, Gem, ShieldAlert
 } from 'lucide-react';
 
 import { AuthService } from './services/authService';
 import { DBService } from './services/databaseService';
 import { MatchingService } from './services/matchingService';
 import { PaymentService } from './services/paymentService';
-import { UserProfile, UserRole } from './types';
+import { WalletService } from './services/walletService';
+import { UserProfile, UserRole, Task, TaskStatus } from './types';
 import Script from 'next/script';
 
 type Screen =
@@ -40,15 +41,24 @@ type Screen =
   | 'payment-processing'
   | 'payment-success'
   | 'payment-failed'
-  | 'premium-paywall';
+  | 'premium-paywall'
+  | 'report-issue';
 
 export default function TumaworksApp() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding');
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [diamonds, setDiamonds] = useState(120);
+  const [diamonds] = useState(120);
   const [role, setRole] = useState<UserRole>('client');
-  const [budget, setBudget] = useState(1500);
+
+  const MAP_THEME = [
+    { "elementType": "geometry", "stylers": [{ "color": "#111111" }] },
+    { "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
+    { "elementType": "labels.text.fill", "stylers": [{ "color": "#757575" }] },
+    { "elementType": "labels.text.stroke", "stylers": [{ "color": "#111111" }] },
+    { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#2c2c2c" }] },
+    { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#000000" }] }
+  ];
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -56,7 +66,9 @@ export default function TumaworksApp() {
   const [depositAmount, setDepositAmount] = useState(500);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'flutterwave' | 'bunipay' | 'stripe' | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'failed'>('idle');
+  const [selectedWorker, setSelectedWorker] = useState<UserProfile | null>(null);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [availableWorkers, setAvailableWorkers] = useState<UserProfile[]>([]);
 
   // Load persistence logic
   useEffect(() => {
@@ -841,6 +853,65 @@ export default function TumaworksApp() {
   // BOLD PREMIUM TASK CREATION
   const TaskCreationScreen = () => {
     const [budget, setBudget] = useState(1500);
+    const [description, setDescription] = useState('');
+    const [serviceType, setServiceType] = useState('Repair (Plumbing/Electric)');
+    const [isCreatingJob, setIsCreatingJob] = useState(false);
+
+    const handleCreateJob = async () => {
+      if (!user) return navigate('signin');
+      if (description.trim().length < 5) return alert("Please provide more details for the pros.");
+      
+      if ((user.walletBalance || 0) < budget) {
+         // Show anti-scam block
+         const confirmTopup = window.confirm(`Insufficient Funds.\n\nTumaworks securely locks ZMW ${budget} in Escrow to guarantee payment to the worker. You currently have ZMW ${user.walletBalance || 0}.\n\nWould you like to add funds now?`);
+         if (confirmTopup) {
+            navigate('add-funds');
+         }
+         return;
+      }
+
+      setIsCreatingJob(true);
+      try {
+         const { WalletService } = await import('./services/walletService');
+         const taskId = 'task_' + Date.now();
+         
+         // 1. Lock funds in Escrow atomically
+         await WalletService.holdInEscrow(user.id, budget, taskId);
+         
+         // 2. Create the open job listing
+         const taskData: Task = {
+            id: taskId,
+            clientId: user.id,
+            serviceId: serviceType,
+            description,
+            budget,
+            escrowAmount: budget,
+            status: 'open',
+            location: { lat: -15.3875, lng: 28.3228, address: "Lusaka" },
+            clientConfirmed: false,
+            workerConfirmed: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+         };
+         await DBService.createTask(taskData);
+         setActiveTask(taskData);
+
+         // Force local state update for fast UI
+         if (user) {
+            setUser({
+               ...user, 
+               walletBalance: (user.walletBalance || 0) - budget,
+               escrowBalance: (user.escrowBalance || 0) + budget
+            });
+         }
+
+         navigate('map-booking');
+      } catch (err: any) {
+         alert("Fund locking failed: " + err.message);
+      } finally {
+         setIsCreatingJob(false);
+      }
+    };
 
     return (
       <div className="min-h-screen bg-neutral-50/50 flex flex-col page-transition pb-32 overflow-y-auto">
@@ -869,7 +940,7 @@ export default function TumaworksApp() {
           <div className="space-y-4">
              <label className="text-[10px] font-bold text-neutral-600  tracking-[0.4em] ml-2">What service do you need?</label>
              <div className="bg-white border border-neutral-100 rounded-[30px] p-2">
-                <select className="w-full bg-transparent px-6 py-4 font-bold text-foreground focus:outline-none appearance-none cursor-pointer  text-xs tracking-widest">
+                <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="w-full bg-transparent px-6 py-4 font-bold text-foreground focus:outline-none appearance-none cursor-pointer  text-xs tracking-widest">
                    <option>Repair (Plumbing/Electric)</option>
                    <option>Home (Cleaning/Laundry)</option>
                    <option>Food (Delivery/Cooking)</option>
@@ -881,7 +952,7 @@ export default function TumaworksApp() {
           <div className="space-y-4">
             <label className="text-[10px] font-bold text-neutral-600  tracking-[0.4em] ml-2">Tell us more details</label>
             <div className="bg-white border border-neutral-100 rounded-[40px] p-2 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
-               <textarea placeholder="DESCRIBE WHAT YOU NEED... (EG. FIXING A LEAKY SINK)" className="w-full bg-transparent p-6 text-foreground focus:outline-none h-40 resize-none font-bold text-xs tracking-widest  placeholder:text-neutral-200" />
+               <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="DESCRIBE WHAT YOU NEED... (EG. FIXING A LEAKY SINK)" className="w-full bg-transparent p-6 text-foreground focus:outline-none h-40 resize-none font-bold text-xs tracking-widest  placeholder:text-neutral-200" />
             </div>
           </div>
 
@@ -916,8 +987,9 @@ export default function TumaworksApp() {
             </div>
           </div>
 
-          <button onClick={() => navigate('map-booking')} className="w-full py-7 bg-primary text-white font-bold rounded-[40px] text-xs  tracking-[0.4em] shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-95 transition-all mt-10">
-            Find Help Near Me
+          <button disabled={isCreatingJob} onClick={handleCreateJob} className="w-full py-7 bg-primary text-white font-bold rounded-[40px] text-xs  tracking-[0.4em] shadow-2xl shadow-primary/30 hover:shadow-primary/50 active:scale-95 transition-all mt-10 disabled:opacity-50 flex items-center justify-center gap-3">
+            {isCreatingJob ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Lock className="w-5 h-5" />}
+            {isCreatingJob ? 'SECURING FUNDS...' : 'LOCK FUNDS & FIND HELP'}
           </button>
         </div>
       </div>
@@ -927,38 +999,37 @@ export default function TumaworksApp() {
     const mapRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-      if (typeof window !== 'undefined' && (window as any).google && mapRef.current) {
-        const map = new (window as any).google.maps.Map(mapRef.current, {
-           center: { lat: -15.3875, lng: 28.3228 }, // Lusaka, Zambia
-           zoom: 14,
-           disableDefaultUI: true,
-           styles: [
-              { "elementType": "geometry", "stylers": [{ "color": "#212121" }] },
-              { "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
-              { "elementType": "labels.text.fill", "stylers": [{ "color": "#757575" }] },
-              { "elementType": "labels.text.stroke", "stylers": [{ "color": "#212121" }] },
-              { "featureType": "administrative", "elementType": "geometry", "stylers": [{ "color": "#757575" }] },
-              { "featureType": "poi", "elementType": "geometry", "stylers": [{ "color": "#181818" }] },
-              { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#2c2c2c" }] },
-              { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#000000" }] }
-           ]
-        });
+      const fetchMarkers = async () => {
+        const workers = await DBService.getWorkers();
+        const ranked = MatchingService.rankWorkers(workers as any, { lat: -15.3875, lng: 28.3228 }, 1500);
+        setAvailableWorkers(ranked as any);
 
-        // Simulating nearby worker pins
-        new (window as any).google.maps.Marker({
-          position: { lat: -15.385, lng: 28.320 },
-          map,
-          title: "John Mwangi",
-          icon: {
-            path: (window as any).google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: "#00A381",
-            fillOpacity: 1,
-            strokeWeight: 4,
-            strokeColor: "#FFFFFF"
-          }
-        });
-      }
+        if (typeof window !== 'undefined' && (window as any).google && mapRef.current) {
+          const map = new (window as any).google.maps.Map(mapRef.current, {
+             center: { lat: -15.3875, lng: 28.3228 },
+             zoom: 14,
+             disableDefaultUI: true,
+             styles: MAP_THEME
+          });
+
+          ranked.forEach((w: any) => {
+            new (window as any).google.maps.Marker({
+              position: w.location,
+              map,
+              title: w.name,
+              icon: {
+                path: (window as any).google.maps.SymbolPath.CIRCLE,
+                scale: 10,
+                fillColor: w.isPremium ? "#F59E0B" : "#00A381",
+                fillOpacity: 1,
+                strokeWeight: 4,
+                strokeColor: "#FFFFFF"
+              }
+            });
+          });
+        }
+      };
+      fetchMarkers();
     }, [currentScreen]);
 
     return (
@@ -973,7 +1044,7 @@ export default function TumaworksApp() {
           
           <div className="absolute top-8 right-8 z-20">
              <div className="bg-primary px-6 py-2 rounded-full font-bold text-[10px] text-white tracking-widest shadow-xl animate-bounce">
-                Searching...
+                {availableWorkers.length > 0 ? `${availableWorkers.length} PROS FOUND` : 'Searching...'}
              </div>
           </div>
         </div>
@@ -982,7 +1053,7 @@ export default function TumaworksApp() {
         <div className="flex justify-between items-center group">
            <div className="space-y-1">
               <h2 className="text-3xl font-bold text-foreground tracking-tighter  leading-none">Workers nearby</h2>
-              <p className="text-[10px] font-bold  text-primary tracking-[0.3em]">Verified Workers</p>
+              <p className="text-[10px] font-bold  text-primary tracking-[0.3em]">Top Matches For Your Budget</p>
            </div>
            <button className="bg-white p-4 rounded-3xl shadow-xl hover:bg-neutral-900 hover:text-white transition-all duration-500 active:scale-95 group-hover:rotate-12 border border-neutral-100">
               <Filter className="w-6 h-6" />
@@ -990,28 +1061,25 @@ export default function TumaworksApp() {
         </div>
 
         <div className="grid gap-8">
-          {[
-            { name: 'John Mwangi', role: 'Master Plumber', dist: '0.5 km', r: 4.9, p: 800, img: '👨‍🔧' },
-            { name: 'Mike Zulu', role: 'Industrial Welder', dist: '1.2 km', r: 4.7, p: 750, img: '👨‍🏭' },
-          ].map((w, i) => (
-            <div key={i} onClick={() => navigate('worker-profile')} className={`group w-full bg-white rounded-[40px] p-8 border border-neutral-100 transition-all duration-700 hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)] hover:-translate-y-2 active:scale-[0.98] cursor-pointer flex gap-8 items-center animate-slideUp`} style={{animationDelay: `${i*0.1}s`}}>
-               <div className="w-24 h-24 bg-neutral-50 rounded-[32px] flex items-center justify-center text-5xl shadow-inner group-hover:scale-105 transition-transform duration-500 flex-shrink-0">
-                 {w.img}
+          {availableWorkers.slice(0, 10).map((w: any, i) => (
+            <div key={w.id} onClick={() => { setSelectedWorker(w); navigate('worker-profile'); }} className={`group w-full bg-white rounded-[40px] p-8 border border-neutral-100 transition-all duration-700 hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)] hover:-translate-y-2 active:scale-[0.98] cursor-pointer flex gap-8 items-center animate-slideUp`} style={{animationDelay: `${i*0.1}s`}}>
+               <div className="w-24 h-24 bg-neutral-50 rounded-[32px] flex items-center justify-center text-5xl shadow-inner group-hover:scale-105 transition-transform duration-500 flex-shrink-0 relative">
+                 {w.profileImage || '👨‍🔧'}
+                 {w.isPremium && <div className="absolute bottom-[-5px] right-[-5px] bg-accent text-white p-2 rounded-full shadow-lg"><Crown className="w-4 h-4"/></div>}
                </div>
                <div className="flex-1 space-y-2 text-left">
                   <div className="flex justify-between items-start">
                      <div>
                         <h3 className="text-xl font-bold text-foreground tracking-tight leading-none group-hover:text-primary transition-colors">{w.name}</h3>
-                        <p className="text-[10px]  font-bold text-neutral-600 tracking-[0.2em] mt-2">{w.role}</p>
+                        <p className="text-[10px]  font-bold text-neutral-600 tracking-[0.2em] mt-2">{w.experience}</p>
                      </div>
                      <div className="flex items-center gap-1 bg-yellow-400/10 px-3 py-1 rounded-xl">
                         <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <span className="text-[10px] font-bold text-yellow-700">{w.r}</span>
+                        <span className="text-[10px] font-bold text-yellow-700">{w.rating}</span>
                      </div>
                   </div>
                   <div className="flex items-center justify-between pt-4 mt-2 border-t border-neutral-50">
-                    <span className="font-bold text-primary text-lg tracking-tighter">ZMW {w.p}</span>
-                    <span className="text-[10px] font-bold  text-neutral-500 tracking-[0.2em]">{w.dist} away</span>
+                    <span className="font-bold text-primary text-sm tracking-widest uppercase">Matching {Math.round((w.matchingScore || 0) * 100)}%</span>
                   </div>
                </div>
             </div>
@@ -1019,27 +1087,62 @@ export default function TumaworksApp() {
         </div>
       </div>
     </div>
-  );
-  };
+  ); };
 
-  // BOLD PREMIUM WORKER PROFILE
   const WorkerProfileScreen = () => {
     const mapRef = useRef<HTMLDivElement>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const w = selectedWorker;
 
     useEffect(() => {
-      if (typeof window !== 'undefined' && (window as any).google && mapRef.current) {
+      if (typeof window !== 'undefined' && (window as any).google && mapRef.current && w) {
         new (window as any).google.maps.Map(mapRef.current, {
-           center: { lat: -15.385, lng: 28.320 },
+           center: w.location || { lat: -15.385, lng: 28.320 },
            zoom: 15,
            disableDefaultUI: true,
-           styles: [
-              { "elementType": "geometry", "stylers": [{ "color": "#212121" }] },
-              { "elementType": "labels", "stylers": [{ "visibility": "off" }] },
-              { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#2c2c2c" }] }
-           ]
+           styles: MAP_THEME
         });
       }
-    }, [currentScreen]);
+    }, [currentScreen, w]);
+
+    if (!w) return null;
+
+    const handleAcceptJob = async () => {
+      if (!activeTask) return;
+      setIsProcessing(true);
+      try {
+        await DBService.updateTask(activeTask.id, { pendingWorkerId: user?.id });
+        setActiveTask({ ...activeTask, pendingWorkerId: user?.id });
+        alert("Request sent! Client will review and assign you soon.");
+      } catch (err) {
+        alert("Failed to accept job");
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    const handleAssignWorker = async () => {
+      if (!activeTask) return;
+      setIsProcessing(true);
+      try {
+        await DBService.updateTask(activeTask.id, { 
+          workerId: w.id, 
+          status: 'assigned' as TaskStatus,
+          pendingWorkerId: undefined 
+        });
+        setActiveTask({ 
+          ...activeTask, 
+          workerId: w.id, 
+          status: 'assigned', 
+          pendingWorkerId: undefined 
+        });
+        navigate('chat-detail');
+      } catch (err) {
+        alert("Failed to assign worker");
+      } finally {
+        setIsProcessing(false);
+      }
+    };
 
     return (
       <div className="min-h-screen bg-neutral-50/50 pb-28 page-transition">
@@ -1054,11 +1157,11 @@ export default function TumaworksApp() {
             
             <div className="flex gap-8 items-center">
                <div className="w-32 h-32 bg-white rounded-[40px] flex items-center justify-center text-6xl shadow-2xl border-[6px] border-white/20 animate-float">
-                 👨‍🔧
+                 {w.profileImage || '👨‍🔧'}
                </div>
                <div className="space-y-2">
-                  <h1 className="text-4xl font-bold text-white tracking-tighter leading-none">John Mwangi</h1>
-                  <p className="text-white/60 font-bold  text-xs tracking-[0.3em]">Master Plumber</p>
+                  <h1 className="text-4xl font-bold text-white tracking-tighter leading-none">{w.name}</h1>
+                  <p className="text-white/60 font-bold  text-xs tracking-[0.3em]">{w.experience || 'Master Pro'}</p>
                   <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-accent/30 w-max mt-4">
                     <ShieldCheck className="w-4 h-4 text-accent" />
                     <span className="text-[10px] font-bold text-accent  tracking-widest">Verified Pro</span>
@@ -1084,42 +1187,45 @@ export default function TumaworksApp() {
                  <span className="text-[10px] font-bold tracking-widest text-neutral-600 mb-2 uppercase">Success rate</span>
                  <div className="flex items-center gap-2">
                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                   <p className="text-3xl font-bold text-foreground tracking-tighter">4.9</p>
+                   <p className="text-3xl font-bold text-foreground tracking-tighter">{w.rating}</p>
                  </div>
               </div>
            </div>
            
            <div className="animate-slideUp" style={{animationDelay: '0.1s'}}>
               <h3 className="text-2xl font-bold text-foreground tracking-tight mb-4">Skills & Experience</h3>
-              <p className="text-neutral-500 font-bold leading-relaxed tracking-tight text-lg mb-8">Professional plumber specializing in high-quality piping, leak repair, and luxury bathroom installations.</p>
+              <p className="text-neutral-500 font-bold leading-relaxed tracking-tight text-lg mb-8">Professional verified pro providing high-quality services to local clients.</p>
               <div className="flex flex-wrap gap-4">
-                {['Plumbing', 'Fast Service', 'Big Projects', 'Cleaning'].map((s, i) => (
+                {(w as any).skills?.map((s: string, i: number) => (
                   <span key={i} className="bg-neutral-900 text-white px-6 py-3 rounded-[24px] text-[10px] font-bold  tracking-[0.2em] shadow-lg shadow-neutral-900/10 transition-transform hover:scale-105">{s}</span>
-                ))}
-              </div>
-           </div>
-
-           <div className="animate-slideUp" style={{animationDelay: '0.2s'}}>
-              <h3 className="text-2xl font-bold text-foreground tracking-tight mb-6">Past Jobs</h3>
-              <div className="bg-white p-8 rounded-[40px] border border-neutral-100 flex items-center gap-6 mb-4 group cursor-pointer hover:shadow-2xl transition-all duration-500">
-                 <div className="w-16 h-16 bg-primary/5 rounded-[24px] flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-500"><Wrench className="w-8 h-8"/></div>
-                 <div className="flex-1">
-                    <h4 className="font-bold text-xl tracking-tight leading-none group-hover:text-primary transition-colors">Industrial Sink Overhaul</h4>
-                    <p className="text-sm font-bold text-neutral-600  tracking-widest mt-2">2 days ago · Lusaka South</p>
-                 </div>
-                 <div className="w-12 h-12 bg-neutral-50 rounded-full flex items-center justify-center group-hover:translate-x-2 transition-transform"><ChevronRight className="w-6 h-6 text-neutral-500"/></div>
+                )) || ['Fast Service', 'Expert'].map((s, i) => <span key={i} className="bg-neutral-900 text-white px-6 py-3 rounded-[24px] text-[10px] font-bold tracking-[0.2em] shadow-lg">{s}</span>)}
               </div>
            </div>
 
            <div className="pt-10">
-              <button onClick={() => navigate('chat-detail')} className="w-full py-6 bg-primary text-white font-bold rounded-[32px] text-xs  tracking-[0.4em] shadow-2xl shadow-primary/30 hover:shadow-primary/40 active:scale-95 transition-all flex items-center justify-center gap-4">
-                 Hire Pro <ArrowRight className="w-5 h-5"/>
-              </button>
-           </div>
+               {user?.role === 'worker' ? (
+                  <button 
+                    disabled={isProcessing || activeTask?.pendingWorkerId === user.id || activeTask?.status !== 'open'}
+                    onClick={handleAcceptJob} 
+                    className="w-full py-6 bg-primary text-white font-bold rounded-[32px] text-xs  tracking-[0.4em] shadow-2xl shadow-primary/30 hover:shadow-primary/40 active:scale-95 transition-all flex items-center justify-center gap-4"
+                  >
+                    {activeTask?.pendingWorkerId === user.id ? 'REQUEST SENT' : 'ACCEPT JOB'} <Wrench className="w-5 h-5"/>
+                  </button>
+               ) : (
+                  <button 
+                    disabled={isProcessing}
+                    onClick={activeTask?.pendingWorkerId === w.id ? handleAssignWorker : () => navigate('chat-detail')} 
+                    className="w-full py-6 bg-neutral-900 text-white font-bold rounded-[32px] text-xs  tracking-[0.4em] shadow-2xl shadow-neutral-900/30 hover:bg-primary transition-all flex items-center justify-center gap-4"
+                  >
+                    {activeTask?.pendingWorkerId === w.id ? 'CONFIRM & ASSIGN PRO' : 'MESSAGE PRO'} <ArrowRight className="w-5 h-5"/>
+                  </button>
+               )}
+            </div>
         </div>
       </div>
     );
   };
+
 
 
   // BOLD PREMIUM CHAT LIST
@@ -1155,53 +1261,118 @@ export default function TumaworksApp() {
 
   // CHAT DETAIL SCREEN
   // BOLD PREMIUM CHAT DETAIL
-  const ChatDetailScreen = () => (
-    <div className="min-h-screen bg-neutral-50/50 flex flex-col pb-32 page-transition">
-      <div className="bg-white/80 backdrop-blur-2xl px-6 py-10 flex items-center justify-between border-b border-neutral-100 sticky top-0 z-40">
-        <div className="flex items-center gap-6">
-          <button onClick={() => navigate('chat-list')} className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-90"><ArrowLeft className="w-6 h-6" /></button>
-          <div className="w-14 h-14 bg-neutral-100 rounded-[20px] shadow-inner flex items-center justify-center text-3xl">👨‍🔧</div>
-          <div className="space-y-1">
-             <h2 className="font-bold text-xl tracking-tighter text-foreground leading-none">John Mwangi</h2>
-             <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <p className="text-[10px] text-neutral-600 font-bold  tracking-widest">Online</p>
+  const ChatDetailScreen = () => {
+    const [isReleasing, setIsReleasing] = useState(false);
+    
+    const handleMarkComplete = async () => {
+      if (!activeTask) return;
+      try {
+        await DBService.updateTask(activeTask.id, { workerConfirmed: true });
+        setActiveTask({ ...activeTask, workerConfirmed: true });
+        alert("Job marked as complete! Waiting for client confirmation.");
+      } catch (err) {
+        alert("Failed to update status");
+      }
+    };
+
+    const handleConfirmPayout = async () => {
+      if (!activeTask) return;
+      setIsReleasing(true);
+      try {
+        await WalletService.releaseEscrow(activeTask.clientId, activeTask.workerId!, activeTask.budget, activeTask.id);
+        setActiveTask({ ...activeTask, status: 'completed' });
+        alert("Payment released successfully!");
+        navigate('wallet');
+      } catch (err: any) {
+        alert(err.message || "Failed to release payment");
+      } finally {
+        setIsReleasing(false);
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-neutral-50/50 flex flex-col pb-44 page-transition">
+        <div className="bg-white/80 backdrop-blur-2xl px-6 py-10 flex items-center justify-between border-b border-neutral-100 sticky top-0 z-40">
+          <div className="flex items-center gap-6">
+            <button onClick={() => navigate('chat-list')} className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-90"><ArrowLeft className="w-6 h-6" /></button>
+            <div className="w-14 h-14 bg-neutral-100 rounded-[20px] shadow-inner flex items-center justify-center text-3xl">👨‍🔧</div>
+            <div className="space-y-1">
+               <h2 className="font-bold text-xl tracking-tighter text-foreground leading-none">John Mwangi</h2>
+               <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <p className="text-[10px] text-neutral-600 font-bold  tracking-widest">Online</p>
+               </div>
+            </div>
+          </div>
+          <button className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center text-white hover:bg-primary transition-colors shadow-lg shadow-neutral-900/10">
+             <Phone className="w-5 h-5" />
+          </button>
+        </div>
+
+          <div className="bg-neutral-900 p-6 mx-4 mt-6 rounded-[32px] text-white flex justify-between items-center shadow-2xl animate-slideUp">
+             <div className="space-y-1">
+                <span className="text-[10px] font-bold text-primary tracking-[0.3em] uppercase">Active Escrow</span>
+                <p className="text-xl font-bold tracking-tight text-white/90">ZMW {activeTask.budget}</p>
+             </div>
+             
+             <div className="flex gap-2">
+               {user?.role === 'worker' ? (
+                  <button 
+                    disabled={activeTask.workerConfirmed}
+                    onClick={handleMarkComplete} 
+                    className={`px-6 py-3 rounded-2xl font-bold text-[10px] tracking-widest transition-all ${activeTask.workerConfirmed ? 'bg-green-500/20 text-green-500 border border-green-500/30' : 'bg-primary text-white hover:scale-105 active:scale-95 shadow-lg shadow-primary/20'}`}
+                  >
+                    {activeTask.workerConfirmed ? 'WAITING FOR CLIENT' : 'MARK COMPLETE'}
+                  </button>
+               ) : (
+                  <>
+                    <button 
+                      onClick={() => navigate('report-issue')}
+                      className="px-4 py-3 rounded-2xl font-bold text-[10px] tracking-widest bg-white/5 text-white/60 border border-white/10 hover:bg-red-500/20 hover:text-red-500 transition-all"
+                    >
+                      <AlertCircle className="w-4 h-4" />
+                    </button>
+                    <button 
+                      disabled={isReleasing || !activeTask.workerConfirmed}
+                      onClick={handleConfirmPayout} 
+                      className={`px-6 py-3 rounded-2xl font-bold text-[10px] tracking-widest transition-all ${!activeTask.workerConfirmed ? 'bg-white/5 text-white/30 cursor-not-allowed' : 'bg-accent text-white hover:scale-105 active:scale-95 shadow-xl shadow-accent/20'}`}
+                    >
+                      {isReleasing ? 'PROCESSING...' : activeTask.workerConfirmed ? 'CONFIRM & PAY' : 'IN PROGRESS'}
+                    </button>
+                  </>
+               )}
              </div>
           </div>
+
+        <div className="flex-1 overflow-auto p-8 space-y-8 mt-4">
+           {(!activeTask || activeTask.status !== 'assigned') && (
+              <div className="bg-yellow-50 border border-yellow-100 p-6 rounded-[32px] flex items-center gap-4 animate-pulse">
+                <ShieldAlert className="w-10 h-10 text-yellow-600" />
+                <p className="text-xs font-bold text-yellow-800 tracking-tight leading-relaxed">Safety Tip: Always keep payments inside the app to be protected by our Escrow system.</p>
+              </div>
+           )}
+
+           <div className="bg-white rounded-[32px] rounded-tl-none p-6 max-w-[85%] shadow-[0_15px_30px_rgba(0,0,0,0.03)] border border-neutral-50 animate-slideUp">
+             <p className="font-bold text-neutral-800 leading-relaxed tracking-tight">Hi! I saw your plumbing request. I can fix it today.</p>
+             <span className="text-[10px] text-neutral-500 font-bold  tracking-widest block mt-4 text-right">10:40 AM</span>
+           </div>
         </div>
-        <button className="w-12 h-12 bg-neutral-900 rounded-2xl flex items-center justify-center text-white hover:bg-primary transition-colors shadow-lg shadow-neutral-900/10">
-           <Phone className="w-5 h-5" />
-        </button>
-      </div>
 
-      <div className="flex-1 overflow-auto p-8 space-y-8 mt-4">
-         <div className="bg-white rounded-[32px] rounded-tl-none p-6 max-w-[85%] shadow-[0_15px_30px_rgba(0,0,0,0.03)] border border-neutral-50 animate-slideUp">
-           <p className="font-bold text-neutral-800 leading-relaxed tracking-tight">Hi! I saw your plumbing request. I can fix it today.</p>
-           <span className="text-[10px] text-neutral-500 font-bold  tracking-widest block mt-4 text-right">10:40 AM</span>
-         </div>
-         <div className="bg-primary text-white rounded-[32px] rounded-tr-none p-6 max-w-[85%] shadow-2xl shadow-primary/20 ml-auto animate-slideUp" style={{animationDelay: '0.1s'}}>
-           <p className="font-bold leading-relaxed tracking-tight">Great! Are you okay with the ZMW 1500 budget?</p>
-           <span className="text-[10px] text-white/50 font-bold  tracking-widest block mt-4 text-right">10:41 AM</span>
-         </div>
-         <div className="bg-white rounded-[32px] rounded-tl-none p-6 max-w-[85%] shadow-[0_15px_30px_rgba(0,0,0,0.03)] border border-neutral-50 animate-slideUp" style={{animationDelay: '0.2s'}}>
-           <p className="font-bold text-neutral-800 leading-relaxed tracking-tight">I am on my way!</p>
-           <span className="text-[10px] text-neutral-500 font-bold  tracking-widest block mt-4 text-right">10:42 AM</span>
-         </div>
-      </div>
-
-      <div className="bg-white/80 backdrop-blur-2xl border-t border-neutral-100 p-6 fixed bottom-0 w-full max-w-md z-30">
-        <div className="flex gap-4">
-          <button className="w-14 h-14 bg-neutral-100 rounded-2xl flex items-center justify-center text-neutral-600 hover:text-primary transition-all active:scale-90"><Plus className="w-6 h-6"/></button>
-          <div className="flex-1 relative group">
-             <input type="text" placeholder="COMMAND INPUT..." className="w-full h-14 bg-neutral-100 rounded-3xl px-6 focus:outline-none focus:ring-4 focus:ring-primary/5 font-bold text-[10px]  tracking-widest placeholder:text-neutral-500" />
-             <button className="absolute right-2 top-2 w-10 h-10 bg-primary text-white rounded-[18px] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
-                <ArrowRight className="w-5 h-5" />
-             </button>
+        <div className="bg-white/80 backdrop-blur-2xl border-t border-neutral-100 p-6 fixed bottom-0 w-full max-w-md z-30">
+          <div className="flex gap-4">
+            <button className="w-14 h-14 bg-neutral-100 rounded-2xl flex items-center justify-center text-neutral-600 hover:text-primary transition-all active:scale-90"><Plus className="w-6 h-6"/></button>
+            <div className="flex-1 relative group">
+               <input type="text" placeholder="COMMAND INPUT..." className="w-full h-14 bg-neutral-100 rounded-3xl px-6 focus:outline-none focus:ring-4 focus:ring-primary/5 font-bold text-[10px]  tracking-widest placeholder:text-neutral-500" />
+               <button className="absolute right-2 top-2 w-10 h-10 bg-primary text-white rounded-[18px] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+                  <ArrowRight className="w-5 h-5" />
+               </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
 
   // PROFILE / SETTINGS (DASHBOARD FOR OWNER)
   // BOLD PREMIUM PROFILE DASHBOARD
@@ -1501,6 +1672,32 @@ export default function TumaworksApp() {
     );
   };
 
+  const ReportIssueScreen = () => (
+    <div className="min-h-screen bg-neutral-50/50 flex flex-col page-transition">
+      <div className="bg-white/80 backdrop-blur-2xl px-6 py-10 flex items-center justify-between border-b border-neutral-100 sticky top-0 z-40">
+        <div className="flex items-center gap-6">
+          <button onClick={() => navigate('chat-detail')} className="w-12 h-12 bg-neutral-100 rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-90"><ArrowLeft className="w-6 h-6" /></button>
+          <h2 className="font-bold text-xl tracking-tighter text-foreground">Report Issue</h2>
+        </div>
+      </div>
+      <div className="p-8 space-y-10">
+        <div className="bg-white p-8 rounded-[40px] border border-neutral-100 shadow-xl space-y-8">
+           <div className="w-20 h-20 bg-red-100 rounded-[30px] flex items-center justify-center text-red-600"><ShieldAlert className="w-10 h-10" /></div>
+           <div className="space-y-4">
+              <h3 className="text-2xl font-bold tracking-tight">What's the problem?</h3>
+              <p className="text-neutral-500 font-bold leading-relaxed">Our support team will review your case. The ZMW {activeTask?.budget} is safely held in escrow.</p>
+           </div>
+           
+           <div className="space-y-4">
+              {['Worker never arrived', 'Incomplete work', 'Service not as described', 'Other issue'].map(r => (
+                <button key={r} onClick={() => alert("Support ticket created. We will contact you.")} className="w-full p-6 text-left border border-neutral-100 rounded-3xl font-bold hover:bg-primary/5 hover:border-primary/20 transition-all text-xs tracking-widest">{r}</button>
+              ))}
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const screenMap: Record<Screen, () => JSX.Element> = {
     onboarding: OnboardingScreen,
     signin: SignInScreen,
@@ -1524,7 +1721,8 @@ export default function TumaworksApp() {
     'payment-processing': PaymentProcessingScreen,
     'payment-success': PaymentSuccessScreen,
     'payment-failed': PaymentFailedScreen,
-    'premium-paywall': PremiumPaywallScreen
+    'premium-paywall': PremiumPaywallScreen,
+    'report-issue': ReportIssueScreen
   };
 
   const CurrentScreen = screenMap[currentScreen];

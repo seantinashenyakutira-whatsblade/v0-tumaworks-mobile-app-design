@@ -43,6 +43,8 @@ export class AuthService {
       rating: 5.0,
       reviewsCount: 0,
       walletBalance: 0,
+      escrowBalance: 0,
+      pendingEarnings: 0,
       isPremium: false,
       location: { lat: -15.3875, lng: 28.3228 }, // Default to Lusaka, Zambia coordinates
       createdAt: serverTimestamp(),
