@@ -19,6 +19,7 @@ export interface UserProfile {
   };
   isPremium: boolean;
   walletBalance: number;
+  pendingBalance: number; // Added for Escrow
   createdAt: any; // Firestore Timestamp
 }
 

@@ -7,7 +7,7 @@ import {
   ShoppingBag, Wrench, Car, Briefcase, Camera, Grid, List, Tag, Share2, Phone,
   Droplets, Hammer, PenTool, Flame, ArrowLeft, Navigation, Edit3, Image as ImageIcon,
   CheckCircle, PlusCircle, Filter, Baby, ShoppingCart, WashingMachine, TrendingUp, HandCoins, ShieldCheck, Wallet as WalletIcon,
-  User, Wallet, Sliders, Plus
+  User, Wallet, Sliders, Plus, CreditCard, Landmark, Shield, Lock, History, Download, AlertCircle, Check
 } from 'lucide-react';
 
 import { AuthService } from './services/authService';
@@ -29,9 +29,17 @@ type Screen =
   | 'chat-detail'
   | 'notifications'
   | 'profile-dashboard'
+  | 'settings'
   | 'subscription'
   | 'marketplace'
-  | 'browse-services';
+  | 'browse-services'
+  | 'wallet'
+  | 'add-funds'
+  | 'checkout'
+  | 'payment-processing'
+  | 'payment-success'
+  | 'payment-failed'
+  | 'premium-paywall';
 
 export default function TumaworksApp() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding');
@@ -45,6 +53,10 @@ export default function TumaworksApp() {
   const [tutorialStep, setTutorialStep] = useState(0);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState('');
+  const [depositAmount, setDepositAmount] = useState(500);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'flutterwave' | 'bunipay' | 'stripe' | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'failed'>('idle');
 
   // Load persistence logic
   useEffect(() => {
@@ -107,10 +119,295 @@ export default function TumaworksApp() {
   };
 
   // BOLD PREMIUM DESIGN SYSTEM
-  const btnPrimary = "solid-bold-btn bg-primary text-white hover:bg-primary/90";
-  const btnAccent = "solid-bold-btn bg-accent text-accent-foreground hover:bg-accent/90";
-  const cardHover = "transition-all duration-500 transform hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(31,38,135,0.12)] active:scale-95 cursor-pointer rounded-3xl";
-  const glassCard = "bg-white/90 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[40px] p-8";
+  const btnPrimary = "solid-bold-btn bg-primary text-white hover:bg-primary/90 transition-all duration-300 transform active:scale-95";
+  const btnAccent = "solid-bold-btn bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 transform active:scale-95";
+  const glassCard = "bg-white/95 backdrop-blur-2xl border border-neutral-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[40px] p-8";
+
+  // --- WALLET & PAYMENT SCREENS ---
+
+  const WalletScreen = () => (
+    <div className="min-h-screen bg-neutral-50 pb-32 pt-12 page-transition">
+       <div className="px-10 mb-10 flex items-center justify-between">
+          <button onClick={() => navigate('profile-dashboard')} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-neutral-100 hover:bg-primary hover:text-white transition-all"><ArrowLeft className="w-6 h-6"/></button>
+          <h1 className="text-2xl font-bold tracking-tighter text-foreground">My Wallet</h1>
+          <button onClick={() => navigate('dashboard')} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-neutral-100"><History className="w-5 h-5"/></button>
+       </div>
+
+       <div className="px-8 space-y-10">
+          <div className="bg-neutral-900 rounded-[50px] p-12 text-white relative overflow-hidden shadow-2xl shadow-neutral-900/20 group">
+             <div className="absolute top-[-20%] right-[-10%] w-56 h-56 bg-primary/20 rounded-full blur-[80px] animate-pulse"></div>
+             <div className="relative z-10 space-y-8">
+                <div className="space-y-4">
+                   <p className="text-[10px] font-bold text-neutral-400 tracking-[0.5em] uppercase">Available Kwacha</p>
+                   <div className="flex items-baseline gap-2">
+                      <span className="text-5xl font-bold tracking-tighter">ZMW {(user?.walletBalance || 0).toLocaleString()}</span>
+                   </div>
+                </div>
+                <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+                   <div className="space-y-2">
+                      <p className="text-[8px] font-bold text-neutral-500 tracking-[0.3em] uppercase">In Escrow</p>
+                      <p className="font-bold text-neutral-300">ZMW {(user?.pendingBalance || 0).toLocaleString()}</p>
+                   </div>
+                   <button onClick={() => navigate('add-funds')} className="bg-primary hover:bg-orange-500 text-white font-bold py-5 px-10 rounded-[28px] text-xs tracking-widest transition-all duration-500 shadow-xl shadow-primary/20">Add Funds</button>
+                </div>
+             </div>
+          </div>
+
+          <div className="space-y-6">
+             <h3 className="text-[10px] font-bold text-neutral-300 tracking-[0.4em] ml-2">Recent Transactions</h3>
+             <div className="space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-white p-6 rounded-[32px] border border-neutral-100 flex items-center justify-between group hover:shadow-xl transition-all duration-500">
+                     <div className="flex items-center gap-6">
+                        <div className="w-12 h-12 bg-neutral-50 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all"><Download className="w-5 h-5"/></div>
+                        <div className="space-y-1">
+                           <p className="font-bold text-foreground">Deposit via Flutterwave</p>
+                           <p className="text-[10px] text-neutral-300 font-bold uppercase tracking-widest">March {24-i}, 2026</p>
+                        </div>
+                     </div>
+                     <span className="font-bold text-green-500 tracking-tight">+ ZMW 1,200</span>
+                  </div>
+                ))}
+             </div>
+          </div>
+       </div>
+    </div>
+  );
+
+  const AddFundsScreen = () => (
+    <div className="min-h-screen bg-neutral-50 pb-20 pt-12 page-transition">
+       <div className="px-10 mb-10 flex items-center gap-6">
+          <button onClick={() => navigate('wallet')} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-neutral-100 transition-all"><ArrowLeft className="w-6 h-6"/></button>
+          <h1 className="text-2xl font-bold tracking-tighter text-foreground leading-none">Add Funds</h1>
+       </div>
+
+       <div className="px-8 space-y-12">
+          <div className="bg-white rounded-[50px] p-12 text-center shadow-sm border border-neutral-100 flex flex-col items-center gap-8">
+             <p className="text-[10px] font-bold text-neutral-300 tracking-[0.4em] uppercase">Amount to add</p>
+             <div className="relative group w-full">
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 text-3xl font-bold text-neutral-200 group-focus-within:text-primary transition-colors">ZMW</span>
+                <input 
+                   type="number" 
+                   value={depositAmount} 
+                   onChange={(e) => setDepositAmount(Number(e.target.value))}
+                   className="w-full text-center text-6xl font-bold bg-transparent focus:outline-none tracking-tighter text-foreground pl-16"
+                />
+             </div>
+             <div className="flex gap-4 flex-wrap justify-center">
+                {[50, 100, 500, 1000].map(amt => (
+                  <button 
+                    key={amt} 
+                    onClick={() => setDepositAmount(amt)}
+                    className={`px-8 py-4 rounded-3xl font-bold text-xs transition-all ${depositAmount === amt ? 'bg-primary text-white shadow-xl scale-110' : 'bg-neutral-50 text-neutral-400 hover:bg-neutral-100'}`}
+                  >ZMW {amt}</button>
+                ))}
+             </div>
+          </div>
+
+          <div className="space-y-6">
+             <h3 className="text-[10px] font-bold text-neutral-300 tracking-[0.4em] ml-2 uppercase">Select Gateway</h3>
+             <div className="space-y-4">
+                {[
+                  { id: 'flutterwave', l: 'Flutterwave (Primary)', d: 'Zambia MM, Visa, Mastercard', i: CreditCard, c: 'bg-primary/5 text-primary' },
+                  { id: 'bunipay', l: 'BuniPay (Fallback)', d: 'Local MM optimization', i: Landmark, c: 'bg-orange-50 text-orange-600' },
+                ].map((gate) => (
+                  <button 
+                    key={gate.id} 
+                    onClick={() => setSelectedPaymentMethod(gate.id as any)}
+                    className={`w-full flex items-center justify-between p-8 rounded-[40px] border transition-all duration-500 group ${selectedPaymentMethod === gate.id ? 'bg-white border-primary shadow-2xl scale-[1.02]' : 'bg-white border-neutral-100 hover:border-neutral-200 shadow-sm'}`}
+                  >
+                    <div className="flex items-center gap-6">
+                       <div className={`w-14 h-14 ${gate.c} rounded-[20px] shadow-inner flex items-center justify-center transition-all duration-500`}><gate.i className="w-6 h-6"/></div>
+                       <div className="text-left space-y-1">
+                          <p className="font-bold text-xl tracking-tight text-foreground">{gate.l}</p>
+                          <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">{gate.d}</p>
+                       </div>
+                    </div>
+                    {selectedPaymentMethod === gate.id && <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center animate-bounceIn"><Check className="w-4 h-4 text-white"/></div>}
+                  </button>
+                ))}
+             </div>
+          </div>
+
+          <button 
+             onClick={() => navigate('payment-processing')}
+             disabled={!selectedPaymentMethod}
+             className={`w-full py-8 rounded-[36px] font-bold text-sm tracking-[0.3em] uppercase transition-all duration-700 shadow-2xl ${selectedPaymentMethod ? 'bg-neutral-900 text-white opacity-100 hover:bg-primary shadow-neutral-900/20 translate-y-0' : 'bg-neutral-100 text-neutral-300 translate-y-4 cursor-not-allowed'}`}
+          >Continue to Payment</button>
+       </div>
+    </div>
+  );
+
+  const PaymentProcessingScreen = () => {
+     useEffect(() => {
+        setTimeout(() => {
+           navigate('payment-success');
+           // In actual flow, we would trigger WalletService.deposit here on success
+        }, 5000);
+     }, []);
+
+     return (
+        <div className="min-h-screen bg-neutral-900 flex flex-col items-center justify-center p-12 text-center page-transition">
+           <div className="w-72 h-72 relative mb-12">
+              <div className="absolute inset-0 border-[12px] border-primary/20 rounded-full"></div>
+              <div className="absolute inset-0 border-[12px] border-primary rounded-full border-t-transparent animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                 <Lock className="w-20 h-20 text-white/20 animate-pulse" />
+              </div>
+           </div>
+           <h2 className="text-4xl font-bold text-white tracking-tighter leading-none mb-4">Processing<br/>Payment...</h2>
+           <p className="text-neutral-500 font-bold text-[10px] tracking-[0.4em] uppercase animate-pulse">Do not close this window</p>
+        </div>
+     );
+  };
+
+  const PaymentSuccessScreen = () => (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-12 text-center page-transition">
+       <div className="w-40 h-40 bg-green-500 rounded-[50px] shadow-2xl shadow-green-500/30 flex items-center justify-center mb-12 animate-bounceIn">
+          <Check className="w-20 h-20 text-white" strokeWidth={3} />
+       </div>
+       <h1 className="text-5xl font-bold tracking-tighter text-foreground leading-none mb-6">Payment<br/>Successful!</h1>
+       <div className="bg-neutral-50 rounded-[40px] p-8 w-full space-y-4 mb-12">
+          <div className="flex justify-between items-center text-[10px] font-bold tracking-widest uppercase text-neutral-300">
+             <span>Amount Added</span>
+             <span className="text-green-500">ZMW {depositAmount}</span>
+          </div>
+          <div className="flex justify-between items-center text-[10px] font-bold tracking-widest uppercase text-neutral-300">
+             <span>Status</span>
+             <span className="text-foreground">COMPLETED</span>
+          </div>
+       </div>
+       <button onClick={() => navigate('dashboard')} className="w-full py-8 bg-neutral-900 text-white font-bold rounded-[36px] text-xs tracking-[0.3em] uppercase hover:bg-primary transition-all duration-500 shadow-2xl shadow-black/10">Back to Dashboard</button>
+    </div>
+  );
+
+  const PaymentFailedScreen = () => (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-12 text-center page-transition">
+       <div className="w-40 h-40 bg-red-500 rounded-[50px] shadow-2xl shadow-red-500/30 flex items-center justify-center mb-12 animate-bounceIn">
+          <X className="w-20 h-20 text-white" strokeWidth={3} />
+       </div>
+       <h1 className="text-5xl font-bold tracking-tighter text-foreground leading-none mb-6">Payment<br/>Failed.</h1>
+       <p className="text-neutral-400 font-bold mb-12 leading-relaxed">Something went wrong with your transaction. Please check your network or try a different payment method.</p>
+       <button onClick={() => navigate('add-funds')} className="w-full py-8 bg-neutral-900 text-white font-bold rounded-[36px] text-xs tracking-[0.3em] uppercase hover:bg-primary transition-all duration-500 shadow-2xl shadow-black/10">Try Again</button>
+    </div>
+  );
+
+  const PremiumPaywallScreen = () => (
+    <div className="min-h-screen bg-neutral-50 pb-20 pt-12 page-transition">
+       <div className="px-10 mb-10 flex items-center justify-between">
+          <button onClick={() => navigate('profile-dashboard')} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-neutral-100"><ArrowLeft className="w-6 h-6"/></button>
+          <div className="w-32 h-1 bg-neutral-200 rounded-full overflow-hidden flex items-center px-1"><div className="w-1/2 h-full bg-primary rounded-full"></div></div>
+          <div className="w-12 h-12"></div>
+       </div>
+
+       <div className="px-8 text-center space-y-4 mb-12">
+          <div className="inline-flex items-center gap-3 bg-primary/10 text-primary px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em]">🛡️ Tumaworks Premium</div>
+          <h1 className="text-5xl font-bold tracking-tighter text-foreground leading-tight">Elevate Your<br/>Strategy.</h1>
+          <p className="text-neutral-400 font-bold leading-relaxed tracking-tight text-lg">Unlock enterprise-grade features and dominate the local market.</p>
+       </div>
+
+       <div className="px-8 space-y-6">
+          {[
+            { id: 'basic', t: 'Individual', p: '$3.99', desc: 'Perfect for local experts', d: 'primary/10', c: 'primary' },
+            { id: 'business', t: 'Enterprise', p: '$6.99', desc: 'For agencies & teams', d: 'accent/20', c: 'accent' }
+          ].map(plan => (
+            <div key={plan.id} className={`bg-white rounded-[50px] p-10 border transition-all duration-500 relative overflow-hidden group hover:shadow-2xl hover:border-transparent ${selectedPlan === plan.id ? `ring-4 ring-${plan.c}` : 'border-neutral-100'}`}>
+               <div className="flex justify-between items-start mb-10">
+                  <div className="space-y-4">
+                     <h3 className="text-3xl font-bold tracking-tighter text-foreground group-hover:text-primary transition-colors">{plan.t}</h3>
+                     <p className="text-sm font-bold text-neutral-300 uppercase tracking-widest">{plan.desc}</p>
+                  </div>
+                  <div className="text-right">
+                     <p className="text-4xl font-bold tracking-tighter text-foreground">{plan.p}</p>
+                     <p className="text-[10px] font-bold text-neutral-300 uppercase">Monthly</p>
+                  </div>
+               </div>
+               
+               <div className="space-y-4 mb-10 text-left">
+                  {['AI Fast Match priority', 'Unlimited job history', 'Verified Expert Badge', '24/7 Enterprise Support'].map((f, i) => (
+                    <div key={i} className="flex items-center gap-4 group/item">
+                       <CheckCircle className="w-5 h-5 text-primary opacity-30 group-hover/item:opacity-100 transition-opacity" />
+                       <span className="text-sm font-bold text-neutral-600 tracking-tight">{f}</span>
+                    </div>
+                  ))}
+               </div>
+
+               <button 
+                  onClick={() => setSelectedPlan(plan.id)}
+                  className={`w-full py-6 rounded-full font-bold text-xs tracking-widest uppercase transition-all duration-500 ${selectedPlan === plan.id ? 'bg-primary text-white shadow-2xl' : 'bg-neutral-50 text-neutral-400 hover:bg-neutral-900 hover:text-white'}`}
+               >Select Plan</button>
+            </div>
+          ))}
+       </div>
+
+       <div className="px-8 mt-12 pb-12">
+          <button 
+             onClick={() => navigate('payment-processing')}
+             disabled={!selectedPlan}
+             className={`w-full py-8 rounded-[40px] font-bold text-sm tracking-[0.4em] uppercase transition-all duration-700 ${selectedPlan ? 'bg-neutral-900 text-white shadow-2xl shadow-black/20 translate-y-0 opacity-100' : 'bg-neutral-100 text-neutral-300 translate-y-4 opacity-50 cursor-not-allowed'}`}
+          >Upgrade Now (Stripe)</button>
+          <p className="text-center text-[8px] font-bold text-neutral-300 uppercase tracking-widest mt-8 flex items-center justify-center gap-3"><Shield className="w-3 h-3"/> Payments secured by Stripe Global</p>
+       </div>
+    </div>
+  );
+
+  const CheckoutScreen = () => (
+    <div className="min-h-screen bg-neutral-50 pb-32 pt-12 page-transition">
+       <div className="px-10 mb-10 flex items-center gap-6">
+          <button onClick={() => navigate('dashboard')} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-neutral-100"><ArrowLeft className="w-6 h-6"/></button>
+          <h1 className="text-2xl font-bold tracking-tighter leading-none">Checkout</h1>
+       </div>
+
+       <div className="px-8 space-y-8">
+          <div className="bg-white rounded-[50px] p-12 border border-neutral-100 shadow-sm space-y-8 animate-slideUp">
+             <div className="flex items-center gap-6 pb-8 border-b border-neutral-50">
+                <div className="w-20 h-20 bg-primary/10 rounded-[28px] flex items-center justify-center text-primary"><PenTool className="w-10 h-10"/></div>
+                <div className="space-y-1">
+                   <h2 className="text-2xl font-bold tracking-tight">Expert Plumbing</h2>
+                   <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Job Booking</p>
+                </div>
+             </div>
+
+             <div className="space-y-6">
+                <div className="flex justify-between text-neutral-400 font-bold text-xs uppercase tracking-widest">
+                   <span>Service Fee</span>
+                   <span className="text-foreground">ZMW 1,200</span>
+                </div>
+                <div className="flex justify-between text-neutral-400 font-bold text-xs uppercase tracking-widest">
+                   <span>Platform Fee</span>
+                   <span className="text-foreground">ZMW 150</span>
+                </div>
+                <div className="flex justify-between items-center pt-8 border-t border-neutral-50">
+                   <span className="text-2xl font-bold tracking-tighter">Total Due</span>
+                   <span className="text-4xl font-bold tracking-tighter text-primary">ZMW 1,350</span>
+                </div>
+             </div>
+          </div>
+
+          <div className="bg-primary/5 rounded-[40px] p-10 border border-primary/20 space-y-6">
+             <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white rounded-2xl shadow-inner flex items-center justify-center text-primary"><WalletIcon className="w-6 h-6"/></div>
+                <div className="text-left space-y-1">
+                   <p className="text-[10px] font-bold text-primary tracking-widest uppercase">My Wallet</p>
+                   <p className="font-bold text-xl tracking-tighter">Current Balance: ZMW {user?.walletBalance || 0}</p>
+                </div>
+             </div>
+             {(user?.walletBalance || 0) < 1350 && (
+                <div className="flex items-start gap-3 bg-red-50 p-6 rounded-3xl border border-red-100">
+                   <AlertCircle className="w-5 h-5 text-red-500 mt-1" />
+                   <p className="text-sm font-bold text-red-600 tracking-tight leading-relaxed">Insufficient wallet funds. Please add funds to proceed with this booking.</p>
+                </div>
+             )}
+          </div>
+
+          <button 
+             onClick={() => navigate('payment-processing')}
+             disabled={(user?.walletBalance || 0) < 1350}
+             className={`w-full py-8 rounded-[40px] font-bold text-sm tracking-[0.4em] uppercase transition-all duration-700 shadow-2xl ${ (user?.walletBalance || 0) >= 1350 ? 'bg-neutral-900 text-white shadow-neutral-900/20 translate-y-0 opacity-100 hover:bg-primary' : 'bg-neutral-100 text-neutral-300 translate-y-4 opacity-50 cursor-not-allowed'}`}
+          >Confirm & Pay Escrow</button>
+       </div>
+    </div>
+  );
 
   // BOLD ONBOARDING SCREEN
   const OnboardingScreen = () => (
@@ -901,6 +1198,23 @@ export default function TumaworksApp() {
             </div>
          </div>
 
+         {/* Wallet Hub */}
+         <div onClick={() => navigate('wallet')} className={glassCard + " bg-neutral-900 !p-10 text-white shadow-2xl hover:shadow-primary/20 hover:-translate-y-2 transition-all duration-700 cursor-pointer group relative overflow-hidden"}>
+            <div className="absolute top-[-30%] left-[-20%] w-56 h-56 bg-primary/20 rounded-full blur-[80px] group-hover:bg-primary/30 transition-all"></div>
+            <div className="relative z-10 flex items-center justify-between">
+               <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                     <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-primary border border-white/10 transition-transform group-hover:scale-110"><WalletIcon className="w-6 h-6"/></div>
+                     <span className="text-[10px] font-bold text-neutral-400 tracking-[0.4em] uppercase">My Wallet</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                     <span className="text-4xl font-bold tracking-tighter">ZMW {(user?.walletBalance || 0).toLocaleString()}</span>
+                  </div>
+               </div>
+               <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:rotate-[360deg] transition-all duration-700"><ChevronRight className="w-6 h-6 text-white"/></div>
+            </div>
+         </div>
+
          {/* Settings */}
          <div className="space-y-6">
             <h3 className="text-[10px] font-bold text-neutral-300  tracking-[0.4em] ml-2">My Settings</h3>
@@ -1129,7 +1443,14 @@ export default function TumaworksApp() {
     settings: SettingsScreen,
     subscription: SubscriptionScreen,
     marketplace: MarketplaceScreen,
-    'browse-services': BrowseServicesScreen
+    'browse-services': BrowseServicesScreen,
+    wallet: WalletScreen,
+    'add-funds': AddFundsScreen,
+    checkout: CheckoutScreen,
+    'payment-processing': PaymentProcessingScreen,
+    'payment-success': PaymentSuccessScreen,
+    'payment-failed': PaymentFailedScreen,
+    'premium-paywall': PremiumPaywallScreen
   };
 
   const CurrentScreen = screenMap[currentScreen];
