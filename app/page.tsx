@@ -7,7 +7,7 @@ import {
   ShoppingBag, Wrench, Car, Briefcase, Camera, Grid, List, Tag, Share2, Phone,
   Droplets, Hammer, PenTool, Flame, ArrowLeft, Navigation, Edit3, Image as ImageIcon,
   CheckCircle, PlusCircle, Filter, Baby, ShoppingCart, WashingMachine, TrendingUp, HandCoins, ShieldCheck, Wallet as WalletIcon,
-  User, Wallet, Sliders, Plus, CreditCard, Landmark, Shield, Lock, History, Download, AlertCircle, Check
+  User, Wallet, Sliders, Plus, CreditCard, Landmark, Shield, Lock, History, Download, AlertCircle, Check, Gem
 } from 'lucide-react';
 
 import { AuthService } from './services/authService';
@@ -48,7 +48,6 @@ export default function TumaworksApp() {
   const [loading, setLoading] = useState(true);
   const [diamonds, setDiamonds] = useState(120);
   const [role, setRole] = useState<UserRole>('client');
-  const [isPremium, setIsPremium] = useState(false);
   const [budget, setBudget] = useState(1500);
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
@@ -738,7 +737,6 @@ export default function TumaworksApp() {
     const [searchQuery, setSearchQuery] = useState('');
     const [services, setServices] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
 
     const categories = ['All', 'Home', 'Food', 'Repairs', 'Creative', 'Transport', 'Business', 'School'];
 
@@ -753,7 +751,6 @@ export default function TumaworksApp() {
           { id: '5', name: 'Food Delivery', category: 'Food', subcategory: 'Meals', shortDescription: 'Get fresh meals delivered to your door.', price: 'ZMW 50 - 200', icon: '🍲', rating: 4.6, reviews: 120 },
         ];
         setServices(reset ? mock : [...services, ...mock]);
-        setHasMore(false);
         setLoading(false);
       }, 500);
     };
@@ -844,7 +841,6 @@ export default function TumaworksApp() {
   // BOLD PREMIUM TASK CREATION
   const TaskCreationScreen = () => {
     const [budget, setBudget] = useState(1500);
-    const [taskPhoto, setTaskPhoto] = useState<string | null>(null);
 
     return (
       <div className="min-h-screen bg-neutral-50/50 flex flex-col page-transition pb-32 overflow-y-auto">
@@ -1425,6 +1421,7 @@ export default function TumaworksApp() {
                 {listings.map((item) => (
                    <div key={item.id} className="bg-white rounded-[50px] overflow-hidden border border-neutral-100 shadow-sm hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-700 group cursor-pointer relative">
                       <div className="h-80 relative overflow-hidden">
+                         {/* eslint-disable-next-line @next/next/no-img-element */}
                          <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                          <div className="absolute top-8 right-8 bg-neutral-900 text-white px-6 py-3 rounded-[30px] shadow-2xl border border-white/10 font-bold text-lg">
                             ZMW {item.price.toLocaleString()}
